@@ -45,6 +45,7 @@ const inter = Inter({
  * Chaque page peut surcharger ces valeurs via son propre export `metadata`.
  */
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? 'https://wog-style.vercel.app'),
   title: {
     template: '%s — WOG-STYLE',
     default: 'WOG-STYLE | Mode Contemporaine & Éditions Limitées',
