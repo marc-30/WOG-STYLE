@@ -47,24 +47,47 @@ export const ConnexionClient: React.FC = () => {
     setLoading(false)
 
     if (tab === 'connexion') {
-      /* Vérification via les comptes de test */
-      const compte = simulerConnexion(identifiant, motDePasse)
-      if (!compte) {
-        setError('Identifiant ou mot de passe incorrect.')
+      /* 1. Essayer d'abord la vraie API */
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ identifiant, motDePasse }),
+      })
+
+      if (res.ok) {
+        const data = await res.json()
+        saveAuthUser({ id: data.user.id, prenom: data.user.prenom, nom: data.user.nom, role: data.user.role.toLowerCase() as 'admin' | 'client' })
+        router.push(data.user.role === 'ADMIN' ? '/admin' : '/profil')
         return
       }
-      /* Sauvegarde la session dans localStorage */
-      saveAuthUser({
-        id: compte.id,
-        prenom: compte.prenom,
-        nom: compte.nom,
-        role: compte.role,
-      })
-      /* Redirection selon le rôle */
-      router.push(compte.role === 'admin' ? '/admin' : '/')
+
+      /* 2. Fallback comptes de test (dev uniquement) */
+      const compte = simulerConnexion(identifiant, motDePasse)
+      if (!compte) {
+        const errData = await res.json().catch(() => ({}))
+        setError(errData.error ?? 'Identifiant ou mot de passe incorrect.')
+        return
+      }
+      saveAuthUser({ id: compte.id, prenom: compte.prenom, nom: compte.nom, role: compte.role })
+      router.push(compte.role === 'admin' ? '/admin' : '/profil')
+
     } else {
-      /* Inscription simulée — redirection vers l'accueil */
-      router.push('/')
+      /* Inscription via la vraie API */
+      const res = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prenom, nom, email: identifiantType === 'email' ? identifiant : undefined, telephone: identifiantType === 'telephone' ? identifiant : undefined, motDePasse }),
+      })
+
+      if (res.ok) {
+        const data = await res.json()
+        saveAuthUser({ id: data.user.id, prenom: data.user.prenom, nom: data.user.nom, role: 'client' })
+        router.push('/profil')
+        return
+      }
+
+      const errData = await res.json().catch(() => ({}))
+      setError(errData.error ?? 'Erreur lors de la création du compte.')
     }
   }
 

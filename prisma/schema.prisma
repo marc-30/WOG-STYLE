@@ -1,0 +1,177 @@
+// WOG-STYLE — Schéma Prisma (PostgreSQL / Supabase)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ── Utilisateurs ──────────────────────────────────────────
+model Utilisateur {
+  id           String   @id @default(cuid())
+  prenom       String
+  nom          String
+  email        String?  @unique
+  telephone    String?  @unique
+  motDePasse   String
+  role         Role     @default(CLIENT)
+  actif        Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  commandes    Commande[]
+  panierItems  PanierItem[]
+
+  @@map("utilisateurs")
+}
+
+enum Role {
+  CLIENT
+  ADMIN
+}
+
+// ── Collections ───────────────────────────────────────────
+model Collection {
+  id          String    @id @default(cuid())
+  slug        String    @unique
+  nom         String
+  description String?
+  imageUrl    String?
+  actif       Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+
+  produits    Produit[]
+
+  @@map("collections")
+}
+
+// ── Produits ──────────────────────────────────────────────
+model Produit {
+  id            String    @id @default(cuid())
+  slug          String    @unique
+  nom           String
+  description   String?
+  prix          Int
+  prixOriginal  Int?
+  marque        String
+  genre         Genre     @default(UNISEXE)
+  statut        Statut    @default(STANDARD)
+  stock         Int       @default(0)
+  actif         Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  collectionId  String?
+  collection    Collection? @relation(fields: [collectionId], references: [id])
+
+  images        ProduitImage[]
+  tailles       ProduitTaille[]
+  lignesCommande LigneCommande[]
+  panierItems   PanierItem[]
+
+  @@map("produits")
+}
+
+enum Genre {
+  HOMME
+  FEMME
+  UNISEXE
+}
+
+enum Statut {
+  STANDARD
+  NEW
+  EXCLUSIVE
+  SALE
+}
+
+// ── Images produits ───────────────────────────────────────
+model ProduitImage {
+  id        String  @id @default(cuid())
+  url       String
+  ordre     Int     @default(0)
+  isHover   Boolean @default(false)
+
+  produitId String
+  produit   Produit @relation(fields: [produitId], references: [id], onDelete: Cascade)
+
+  @@map("produit_images")
+}
+
+// ── Tailles produits ──────────────────────────────────────
+model ProduitTaille {
+  id        String  @id @default(cuid())
+  label     String
+  stock     Int     @default(0)
+  disponible Boolean @default(true)
+
+  produitId String
+  produit   Produit @relation(fields: [produitId], references: [id], onDelete: Cascade)
+
+  @@map("produit_tailles")
+}
+
+// ── Commandes ─────────────────────────────────────────────
+model Commande {
+  id              String         @id @default(cuid())
+  reference       String         @unique @default(cuid())
+  statut          StatutCommande @default(EN_ATTENTE)
+  methodePaiement String
+  montantTotal    Int
+  adresseLivraison String?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  utilisateurId   String
+  utilisateur     Utilisateur    @relation(fields: [utilisateurId], references: [id])
+
+  lignes          LigneCommande[]
+
+  @@map("commandes")
+}
+
+enum StatutCommande {
+  EN_ATTENTE
+  PAYE
+  EN_PREPARATION
+  EXPEDIE
+  LIVRE
+  ANNULE
+}
+
+// ── Lignes de commande ────────────────────────────────────
+model LigneCommande {
+  id           String   @id @default(cuid())
+  quantite     Int
+  prixUnitaire Int
+  taille       String
+
+  commandeId   String
+  commande     Commande @relation(fields: [commandeId], references: [id], onDelete: Cascade)
+
+  produitId    String
+  produit      Produit  @relation(fields: [produitId], references: [id])
+
+  @@map("commande_lignes")
+}
+
+// ── Panier persisté (utilisateur connecté) ───────────────
+model PanierItem {
+  id         String   @id @default(cuid())
+  quantite   Int      @default(1)
+  taille     String
+  createdAt  DateTime @default(now())
+
+  utilisateurId String
+  utilisateur   Utilisateur @relation(fields: [utilisateurId], references: [id], onDelete: Cascade)
+
+  produitId  String
+  produit    Produit @relation(fields: [produitId], references: [id])
+
+  @@unique([utilisateurId, produitId, taille])
+  @@map("panier_items")
+}
+

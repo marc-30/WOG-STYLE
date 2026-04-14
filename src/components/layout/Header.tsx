@@ -11,6 +11,7 @@ import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useScrollHeader } from '@/hooks/useScrollHeader'
 import { useCart } from '@/hooks/useCart'
+import { useAuth } from '@/hooks/useAuth'
 import { MegaMenu, NAV_ITEMS } from './MegaMenu'
 import type { NavItem } from '@/types'
 
@@ -59,6 +60,7 @@ const WogLogo: React.FC<{ className?: string }> = ({ className = '' }) => (
 export const Header: React.FC = () => {
   const { isScrolled } = useScrollHeader()
   const { totalItems, toggleCart } = useCart()
+  const { isAuthenticated } = useAuth()
 
   const [activeNavItem, setActiveNavItem] = useState<NavItem | null>(null)
   const closeTimeoutRef = useRef<NodeJS.Timeout | null>(null)
@@ -145,7 +147,7 @@ export const Header: React.FC = () => {
                 className="text-end-black hover:opacity-60 transition-opacity">
                 <SearchIcon />
               </button>
-              <Link href="/connexion" aria-label="Mon compte"
+              <Link href={isAuthenticated ? '/profil' : '/connexion'} aria-label="Mon compte"
                 className="text-end-black hover:opacity-60 transition-opacity">
                 <AccountIcon />
               </Link>
