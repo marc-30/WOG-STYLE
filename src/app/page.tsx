@@ -33,7 +33,7 @@ export default function HomePage() {
         style={{ height: 'calc(100svh - 130px)', minHeight: '400px', maxHeight: '900px' }}
       >
         <img
-          src="/images/AAAA.JPG" 
+          src="/images/AAAA.jpg"
           alt="WOG-STYLE — Nouvelle Collection"
           className="absolute inset-0 w-full h-full object-cover object-center"
         />
