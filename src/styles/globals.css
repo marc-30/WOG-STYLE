@@ -1,0 +1,357 @@
+/**
+ * @fichier globals.css
+ * @rôle Styles globaux de l'application END. Clothing Clone.
+ *        Initialise Tailwind, définit les variables CSS personnalisées,
+ *        les resets spécifiques et les styles de base partagés.
+ * @dépendances tailwindcss
+ * @auteur Clone END. Clothing
+ * @date 2024-01-01
+ */
+
+/* === DIRECTIVES TAILWIND CSS ===
+ * Injection des couches de base, utilitaires et composants de Tailwind
+ */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* === IMPORT DE LA POLICE INTER ===
+ * Chargement de la police Inter depuis Google Fonts pour une typographie propre
+ */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+/* === VARIABLES CSS GLOBALES ===
+ * Variables réutilisables à travers tous les composants
+ */
+:root {
+  /* Couleurs de la charte graphique END. */
+  --color-black: #000000;
+  --color-white: #ffffff;
+  --color-gray-light: #f5f5f5;
+  --color-gray-mid: #9b9b9b;
+  --color-gray-dark: #4a4a4a;
+  --color-gray-border: #e0e0e0;
+  --color-red: #e53935;
+  --color-header-bg: #111111;
+
+  /* Hauteurs du header */
+  --header-height: 60px;
+  --header-height-scrolled: 52px;
+  --topbar-height: 36px;
+
+  /* Largeur du drawer mini-panier */
+  --drawer-width: 384px;
+
+  /* Gouttière de grille produit */
+  --grid-gap: 1px;
+
+  /* Transition standard */
+  --transition-standard: 250ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --transition-fast: 150ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* === RESET ET BASE ===
+ * Normalisation des styles navigateur pour une cohérence cross-browser
+ */
+*,
+*::before,
+*::after {
+  /* Box-sizing border-box pour tous les éléments */
+  box-sizing: border-box;
+  /* Suppression des marges et paddings par défaut */
+  margin: 0;
+  padding: 0;
+}
+
+/* Style de base du corps de page */
+html {
+  /* Activation du scroll fluide pour les ancres */
+  scroll-behavior: smooth;
+  /* Prévention du zoom sur les inputs iOS */
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  /* Police de base : Inter avec fallbacks système */
+  font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+  /* Couleur de texte par défaut : noir pur */
+  color: #000000;
+  /* Fond blanc pur pour le contenu principal */
+  background-color: #ffffff;
+  /* Rendu des polices optimisé pour la lisibilité */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  /* Taille de texte de base */
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* === LIENS ===
+ * Style par défaut des liens : sans soulignement, couleur héritée
+ */
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Style au survol des liens */
+a:hover {
+  text-decoration: none;
+}
+
+/* === IMAGES ===
+ * Les images sont block pour éviter l'espace blanc par défaut
+ */
+img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+/* === BOUTONS ===
+ * Reset des styles natifs des boutons
+ */
+button {
+  cursor: pointer;
+  border: none;
+  background: none;
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+  padding: 0;
+}
+
+button:focus-visible {
+  /* Outline d'accessibilité visible uniquement à la navigation clavier */
+  outline: 2px solid #000000;
+  outline-offset: 2px;
+}
+
+/* === INPUTS ===
+ * Reset des champs de formulaire
+ */
+input,
+select,
+textarea {
+  font-family: inherit;
+  font-size: inherit;
+}
+
+input:focus,
+textarea:focus {
+  /* Outline personnalisé pour l'accessibilité */
+  outline: 1px solid #000000;
+}
+
+/* === LISTE ===
+ * Suppression des styles de liste par défaut
+ */
+ul,
+ol {
+  list-style: none;
+}
+
+/* === SCROLLBAR PERSONNALISÉE ===
+ * Style de la barre de défilement pour les navigateurs WebKit
+ */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f5f5f5;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c0c0c0;
+  border-radius: 2px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #9b9b9b;
+}
+
+/* === SÉLECTION DE TEXTE ===
+ * Couleur de sélection alignée sur la charte END.
+ */
+::selection {
+  background-color: #000000;
+  color: #ffffff;
+}
+
+/* === CLASSES UTILITAIRES PERSONNALISÉES ===
+ * Classes Tailwind composées pour les patterns récurrents du site
+ */
+@layer components {
+
+  /* Bouton principal noir END. */
+  .btn-primary {
+    @apply bg-end-black text-end-white px-6 py-3 text-sm font-semibold uppercase tracking-wider
+           transition-all duration-150 hover:bg-end-hover active:scale-95
+           focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-end-black;
+  }
+
+  /* Bouton secondaire contour */
+  .btn-secondary {
+    @apply border border-end-black text-end-black px-6 py-3 text-sm font-semibold uppercase tracking-wider
+           transition-all duration-150 hover:bg-end-black hover:text-end-white active:scale-95;
+  }
+
+  /* Label de badge produit */
+  .product-badge {
+    @apply inline-block px-2 py-0.5 text-2xs font-bold uppercase tracking-wider;
+  }
+
+  /* Badge "New In" : fond noir, texte blanc */
+  .badge-new {
+    @apply product-badge bg-end-black text-end-white;
+  }
+
+  /* Badge "Exclusive" : fond gris foncé, texte blanc */
+  .badge-exclusive {
+    @apply product-badge bg-end-gray-dark text-end-white;
+  }
+
+  /* Badge "Sale" : fond rouge, texte blanc */
+  .badge-sale {
+    @apply product-badge bg-end-red text-end-white;
+  }
+
+  /* Titre de section uppercase condensé */
+  .section-title {
+    @apply text-sm font-bold uppercase tracking-widest text-end-black;
+  }
+
+  /* Séparateur horizontal */
+  .divider {
+    @apply border-t border-end-gray-border;
+  }
+
+  /* Conteneur de page centré avec marges latérales */
+  .page-container {
+    @apply max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  /* Grille de produits responsive */
+  .product-grid {
+    @apply grid grid-cols-2 lg:grid-cols-4 gap-px bg-end-gray-border;
+  }
+
+  /* Carte de cellule dans la grille */
+  .product-cell {
+    @apply bg-end-white;
+  }
+}
+
+/* === ANIMATIONS GLOBALES ===
+ * Keyframes pour les micro-animations non gérées par Framer Motion
+ */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Classe utilitaire pour l'animation fadeIn */
+.animate-fade-in {
+  animation: fadeIn 250ms cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+/* Classe pour le slide depuis la droite (drawer panier) */
+.animate-slide-in-right {
+  animation: slideInRight 350ms cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+/* === STYLES SPECIFIQUES AU MEGA-MENU ===
+ * La superposition du mega-menu nécessite des z-index élevés
+ */
+.mega-menu-overlay {
+  /* Fond semi-transparent derrière le mega-menu */
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: none;
+}
+
+/* === STYLES DU ZOOM IMAGE ===
+ * Conteneur de zoom pour la galerie produit
+ */
+.zoom-container {
+  overflow: hidden;
+  cursor: zoom-in;
+}
+
+.zoom-container:hover .zoom-image {
+  transform: scale(1.08);
+  transition: transform 600ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.zoom-image {
+  transition: transform 600ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  will-change: transform;
+}
+
+/* === STYLES DE LA BARRE DE DÉFILEMENT DU DRAWER ===
+ * Scrollbar fine pour le contenu du mini-panier
+ */
+.drawer-scroll {
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #c0c0c0 transparent;
+}
+
+/* === RESPONSIVE : MASQUAGE MOBILE ===
+ * Classes utilitaires supplémentaires pour la gestion responsive
+ */
+@media (max-width: 1023px) {
+  /* Masquage du mega-menu sur mobile */
+  .mega-menu-desktop {
+    display: none;
+  }
+}
+
+/* === PRINT ===
+ * Styles d'impression minimalistes
+ */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+}

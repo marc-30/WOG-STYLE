@@ -1,0 +1,56 @@
+[
+  {
+    "id": "wog-style",
+    "slug": "wog-style",
+    "name": "WOG Style",
+    "categories": ["clothing", "accessories", "lifestyle"],
+    "logoUrl": "/images/logo.jpg",
+    "featured": true,
+    "description": "La marque WOG-STYLE — un univers de mode contemporaine, audacieuse et consciente."
+  },
+  {
+    "id": "wog-homme",
+    "slug": "wog-homme",
+    "name": "WOG Homme",
+    "categories": ["clothing"],
+    "logoUrl": null,
+    "featured": true,
+    "description": "La ligne homme WOG-STYLE : vêtements taillés pour l'homme moderne et affirmé."
+  },
+  {
+    "id": "wog-femme",
+    "slug": "wog-femme",
+    "name": "WOG Femme",
+    "categories": ["clothing"],
+    "logoUrl": null,
+    "featured": true,
+    "description": "La ligne femme WOG-STYLE : silhouettes affirmées pour la femme contemporaine."
+  },
+  {
+    "id": "wog-unisex",
+    "slug": "wog-unisex",
+    "name": "WOG Unisexe",
+    "categories": ["clothing", "lifestyle"],
+    "logoUrl": null,
+    "featured": true,
+    "description": "La ligne unisexe WOG-STYLE : pièces sans genre pour un style libre et affirmé."
+  },
+  {
+    "id": "wog-editorial",
+    "slug": "wog-editorial",
+    "name": "WOG Editorial",
+    "categories": ["clothing"],
+    "logoUrl": null,
+    "featured": true,
+    "description": "Les drops éditoriaux WOG-STYLE : pièces rares issues de collaborations créatives."
+  },
+  {
+    "id": "wog-capsule",
+    "slug": "wog-capsule",
+    "name": "WOG Capsule",
+    "categories": ["clothing", "lifestyle"],
+    "logoUrl": null,
+    "featured": false,
+    "description": "Les collections capsules WOG-STYLE : accessibles, portables, immédiates."
+  }
+]

@@ -1,0 +1,546 @@
+[
+  {
+    "id": "prod-001",
+    "slug": "wog-h1-collection-black",
+    "brand": "WOG Style",
+    "brandId": "wog-style",
+    "name": "Collection Noire Homme Vol.1",
+    "sku": "WOG-H1-001",
+    "price": 85000,
+    "originalPrice": null,
+    "currency": "XOF",
+    "images": ["/images/prod-h1-main.jpg", "/images/prod-h1-hover.jpg"],
+    "mainImage": {
+      "src": "/images/prod-h1-main.jpg",
+      "alt": "WOG Style Collection Noire Homme Vol.1 — vue principale",
+      "width": 1440,
+      "height": 1920
+    },
+    "hoverImage": {
+      "src": "/images/prod-h1-hover.jpg",
+      "alt": "WOG Style Collection Noire Homme Vol.1 — vue alternative",
+      "width": 1440,
+      "height": 1920
+    },
+    "gallery": [
+      { "src": "/images/prod-h1-main.jpg", "alt": "vue principale", "width": 1440, "height": 1920 },
+      { "src": "/images/prod-h1-hover.jpg", "alt": "vue alternative", "width": 1440, "height": 1920 }
+    ],
+    "sizes": [
+      { "label": "XS", "value": "XS", "inStock": true },
+      { "label": "S", "value": "S", "inStock": true },
+      { "label": "M", "value": "M", "inStock": true },
+      { "label": "L", "value": "L", "inStock": false },
+      { "label": "XL", "value": "XL", "inStock": true },
+      { "label": "XXL", "value": "XXL", "inStock": true }
+    ],
+    "color": "Noir",
+    "category": "clothing",
+    "genre": "HOMME",
+    "status": "new",
+    "stock": 24,
+    "description": "Pièce signature de la collection homme WOG-STYLE. Une silhouette élancée et structurée, pensée pour l'homme contemporain qui revendique son style sans compromis. Coupe ajustée, finitions impeccables.",
+    "composition": "100% coton premium. Confection locale, édition limitée.",
+    "tags": ["homme", "noir", "collection", "signature", "streetwear"],
+    "addedAt": "2024-01-20T10:00:00Z",
+    "featured": true
+  },
+  {
+    "id": "prod-002",
+    "slug": "wog-h2-collection-homme-vol2",
+    "brand": "WOG Style",
+    "brandId": "wog-style",
+    "name": "Collection Homme Vol.2",
+    "sku": "WOG-H2-002",
+    "price": 95000,
+    "originalPrice": null,
+    "currency": "XOF",
+    "images": ["/images/prod-h2-main.jpg", "/images/prod-h2-hover.jpg"],
+    "mainImage": {
+      "src": "/images/prod-h2-main.jpg",
+      "alt": "WOG Style Collection Homme Vol.2 — vue principale",
+      "width": 1440,
+      "height": 1920
+    },
+    "hoverImage": {
+      "src": "/images/prod-h2-hover.jpg",
+      "alt": "WOG Style Collection Homme Vol.2 — vue alternative",
+      "width": 1440,
+      "height": 1920
+    },
+    "gallery": [
+      { "src": "/images/prod-h2-main.jpg", "alt": "vue principale", "width": 1440, "height": 1920 },
+      { "src": "/images/prod-h2-hover.jpg", "alt": "vue alternative", "width": 1440, "height": 1920 }
+    ],
+    "sizes": [
+      { "label": "XS", "value": "XS", "inStock": true },
+      { "label": "S", "value": "S", "inStock": true },
+      { "label": "M", "value": "M", "inStock": false },
+      { "label": "L", "value": "L", "inStock": true },
+      { "label": "XL", "value": "XL", "inStock": true },
+      { "label": "XXL", "value": "XXL", "inStock": false }
+    ],
+    "color": "Noir/Blanc",
+    "category": "clothing",
+    "genre": "HOMME",
+    "status": "exclusive",
+    "stock": 12,
+    "description": "Deuxième opus de la collection homme WOG-STYLE. Un équilibre parfait entre audace et élégance urbaine. Cette pièce exclusive incarne la vision de la marque : un vêtement pensé pour ceux qui tracent leur propre chemin.",
+    "composition": "Tissu technique haute densité. Finitions couture surpiquées. Édition exclusive.",
+    "tags": ["homme", "exclusif", "collection", "urban", "premium"],
+    "addedAt": "2024-01-22T10:00:00Z",
+    "featured": true
+  },
+  {
+    "id": "prod-003",
+    "slug": "wog-h3-lookbook-homme",
+    "brand": "WOG Style",
+    "brandId": "wog-style",
+    "name": "Lookbook Homme — Pièce Phare",
+    "sku": "WOG-H3-003",
+    "price": 128000,
+    "originalPrice": null,
+    "currency": "XOF",
+    "images": ["/images/prod-h3-main.jpg", "/images/prod-h3-hover.jpg"],
+    "mainImage": {
+      "src": "/images/prod-h3-main.jpg",
+      "alt": "WOG Style Lookbook Homme — Pièce Phare vue principale",
+      "width": 1366,
+      "height": 2048
+    },
+    "hoverImage": {
+      "src": "/images/prod-h3-hover.jpg",
+      "alt": "WOG Style Lookbook Homme — Pièce Phare vue alternative",
+      "width": 1366,
+      "height": 2048
+    },
+    "gallery": [
+      { "src": "/images/prod-h3-main.jpg", "alt": "vue principale", "width": 1366, "height": 2048 },
+      { "src": "/images/prod-h3-hover.jpg", "alt": "vue alternative", "width": 1366, "height": 2048 }
+    ],
+    "sizes": [
+      { "label": "S", "value": "S", "inStock": true },
+      { "label": "M", "value": "M", "inStock": true },
+      { "label": "L", "value": "L", "inStock": true },
+      { "label": "XL", "value": "XL", "inStock": false },
+      { "label": "XXL", "value": "XXL", "inStock": true }
+    ],
+    "color": "Camel/Noir",
+    "category": "clothing",
+    "genre": "HOMME",
+    "status": "new",
+    "stock": 8,
+    "description": "La pièce phare du lookbook homme WOG-STYLE. Un vêtement qui se distingue par sa construction soignée et ses matières nobles. Chaque détail a été pensé pour créer une tenue complète et cohérente.",
+    "composition": "Mélange laine et coton. Doublure satin. Boutons résine naturelle.",
+    "tags": ["homme", "lookbook", "phare", "laine", "luxe abordable"],
+    "addedAt": "2024-01-25T10:00:00Z",
+    "featured": true
+  },
+  {
+    "id": "prod-004",
+    "slug": "wog-f1-collection-femme-vol1",
+    "brand": "WOG Style",
+    "brandId": "wog-style",
+    "name": "Collection Femme Vol.1",
+    "sku": "WOG-F1-004",
+    "price": 79000,
+    "originalPrice": null,
+    "currency": "XOF",
+    "images": ["/images/prod-f1-main.jpg", "/images/prod-f1-hover.jpg"],
+    "mainImage": {
+      "src": "/images/prod-f1-main.jpg",
+      "alt": "WOG Style Collection Femme Vol.1 — vue principale",
+      "width": 1440,
+      "height": 1920
+    },
+    "hoverImage": {
+      "src": "/images/prod-f1-hover.jpg",
+      "alt": "WOG Style Collection Femme Vol.1 — vue alternative",
+      "width": 1440,
+      "height": 1920
+    },
+    "gallery": [
+      { "src": "/images/prod-f1-main.jpg", "alt": "vue principale", "width": 1440, "height": 1920 },
+      { "src": "/images/prod-f1-hover.jpg", "alt": "vue alternative", "width": 1440, "height": 1920 }
+    ],
+    "sizes": [
+      { "label": "XS", "value": "XS", "inStock": true },
+      { "label": "S", "value": "S", "inStock": true },
+      { "label": "M", "value": "M", "inStock": true },
+      { "label": "L", "value": "L", "inStock": true },
+      { "label": "XL", "value": "XL", "inStock": false }
+    ],
+    "color": "Noir",
+    "category": "clothing",
+    "genre": "FEMME",
+    "status": "new",
+    "stock": 20,
+    "description": "Premier opus de la collection femme WOG-STYLE. Une silhouette affirmée pour la femme moderne, alliant féminité et caractère. La coupe met en valeur la ligne tout en offrant confort et liberté de mouvement.",
+    "composition": "Viscose premium. Tombé fluide. Coutures anglaises.",
+    "tags": ["femme", "noir", "collection", "chic", "urbain"],
+    "addedAt": "2024-01-18T10:00:00Z",
+    "featured": true
+  },
+  {
+    "id": "prod-005",
+    "slug": "wog-f2-collection-femme-vol2",
+    "brand": "WOG Style",
+    "brandId": "wog-style",
+    "name": "Collection Femme Vol.2",
+    "sku": "WOG-F2-005",
+    "price": 88000,
+    "originalPrice": 108000,
+    "currency": "XOF",
+    "images": ["/images/prod-f2-main.jpg", "/images/prod-f2-hover.jpg"],
+    "mainImage": {
+      "src": "/images/prod-f2-main.jpg",
+      "alt": "WOG Style Collection Femme Vol.2 — vue principale",
+      "width": 1440,
+      "height": 1920
+    },
+    "hoverImage": {
+      "src": "/images/prod-f2-hover.jpg",
+      "alt": "WOG Style Collection Femme Vol.2 — vue alternative",
+      "width": 1440,
+      "height": 1920
+    },
+    "gallery": [
+      { "src": "/images/prod-f2-main.jpg", "alt": "vue principale", "width": 1440, "height": 1920 },
+      { "src": "/images/prod-f2-hover.jpg", "alt": "vue alternative", "width": 1440, "height": 1920 }
+    ],
+    "sizes": [
+      { "label": "XS", "value": "XS", "inStock": true },
+      { "label": "S", "value": "S", "inStock": false },
+      { "label": "M", "value": "M", "inStock": true },
+      { "label": "L", "value": "L", "inStock": true },
+      { "label": "XL", "value": "XL", "inStock": true }
+    ],
+    "color": "Beige/Crème",
+    "category": "clothing",
+    "genre": "FEMME",
+    "status": "sale",
+    "stock": 15,
+    "description": "La collection femme Vol.2 WOG-STYLE explore les tons neutres et les matières douces. Une pièce polyvalente qui se porte aussi bien le jour que le soir, seule ou en layering.",
+    "composition": "Coton biologique certifié. Teinture naturelle. Confection éthique.",
+    "tags": ["femme", "beige", "naturel", "éthique", "versatile"],
+    "addedAt": "2024-01-15T10:00:00Z",
+    "featured": true
+  },
+  {
+    "id": "prod-006",
+    "slug": "wog-f3-edition-limitee-femme",
+    "brand": "WOG Style",
+    "brandId": "wog-style",
+    "name": "Édition Limitée Femme",
+    "sku": "WOG-F3-006",
+    "price": 118000,
+    "originalPrice": null,
+    "currency": "XOF",
+    "images": ["/images/prod-f3-main.jpg", "/images/prod-f3-hover.jpg"],
+    "mainImage": {
+      "src": "/images/prod-f3-main.jpg",
+      "alt": "WOG Style Édition Limitée Femme — vue principale",
+      "width": 1152,
+      "height": 2048
+    },
+    "hoverImage": {
+      "src": "/images/prod-f3-hover.jpg",
+      "alt": "WOG Style Édition Limitée Femme — vue alternative",
+      "width": 443,
+      "height": 590
+    },
+    "gallery": [
+      { "src": "/images/prod-f3-main.jpg", "alt": "vue principale", "width": 1152, "height": 2048 },
+      { "src": "/images/prod-f3-hover.jpg", "alt": "vue alternative", "width": 443, "height": 590 }
+    ],
+    "sizes": [
+      { "label": "XS", "value": "XS", "inStock": false },
+      { "label": "S", "value": "S", "inStock": true },
+      { "label": "M", "value": "M", "inStock": true },
+      { "label": "L", "value": "L", "inStock": false },
+      { "label": "XL", "value": "XL", "inStock": true }
+    ],
+    "color": "Sable",
+    "category": "clothing",
+    "genre": "FEMME",
+    "status": "exclusive",
+    "stock": 5,
+    "description": "Pièce d'exception de la collection WOG-STYLE. Une édition limitée numérotée, réalisée dans les ateliers partenaires de la marque. Chaque exemplaire est unique par ses légères variations de teinte naturelle.",
+    "composition": "Lin premium irlandais. Teinture à la main. Numérotée et certifiée.",
+    "tags": ["femme", "édition limitée", "lin", "artisanal", "rare"],
+    "addedAt": "2024-01-28T10:00:00Z",
+    "featured": false
+  },
+  {
+    "id": "prod-007",
+    "slug": "wog-editorial-1-unisex",
+    "brand": "WOG Style",
+    "brandId": "wog-style",
+    "name": "Drop Editorial — Unisexe",
+    "sku": "WOG-ED1-007",
+    "price": 102000,
+    "originalPrice": null,
+    "currency": "XOF",
+    "images": ["/images/editorial-1.jpg", "/images/editorial-2.jpg"],
+    "mainImage": {
+      "src": "/images/editorial-1.jpg",
+      "alt": "WOG Style Drop Editorial Unisexe — vue principale",
+      "width": 1440,
+      "height": 1920
+    },
+    "hoverImage": {
+      "src": "/images/editorial-2.jpg",
+      "alt": "WOG Style Drop Editorial Unisexe — vue alternative",
+      "width": 1440,
+      "height": 1919
+    },
+    "gallery": [
+      { "src": "/images/editorial-1.jpg", "alt": "vue principale", "width": 1440, "height": 1920 },
+      { "src": "/images/editorial-2.jpg", "alt": "vue alternative", "width": 1440, "height": 1919 }
+    ],
+    "sizes": [
+      { "label": "XS", "value": "XS", "inStock": true },
+      { "label": "S", "value": "S", "inStock": true },
+      { "label": "M", "value": "M", "inStock": true },
+      { "label": "L", "value": "L", "inStock": true },
+      { "label": "XL", "value": "XL", "inStock": true },
+      { "label": "XXL", "value": "XXL", "inStock": false }
+    ],
+    "color": "Charbon",
+    "category": "clothing",
+    "genre": "UNISEXE",
+    "status": "new",
+    "stock": 30,
+    "description": "Le premier drop éditorial unisexe WOG-STYLE. Une pièce conçue pour transcender les genres et les codes vestimentaires. Portée par les créatifs et les esprits libres, elle affirme une identité sans frontières.",
+    "composition": "Jersey lourd double épaisseur. Oversize fit. Poids 320g/m².",
+    "tags": ["unisexe", "editorial", "drop", "oversize", "genderless"],
+    "addedAt": "2024-01-30T10:00:00Z",
+    "featured": true
+  },
+  {
+    "id": "prod-008",
+    "slug": "wog-marque-collection-brand1",
+    "brand": "WOG Style",
+    "brandId": "wog-style",
+    "name": "Collection Marque — Édition I",
+    "sku": "WOG-MAR1-008",
+    "price": 138000,
+    "originalPrice": 164000,
+    "currency": "XOF",
+    "images": ["/images/brand-editorial-1.jpg", "/images/brand-editorial-2.jpg"],
+    "mainImage": {
+      "src": "/images/brand-editorial-1.jpg",
+      "alt": "WOG Style Collection Marque Édition I — vue principale",
+      "width": 1440,
+      "height": 1920
+    },
+    "hoverImage": {
+      "src": "/images/brand-editorial-2.jpg",
+      "alt": "WOG Style Collection Marque Édition I — vue alternative",
+      "width": 1440,
+      "height": 1918
+    },
+    "gallery": [
+      { "src": "/images/brand-editorial-1.jpg", "alt": "vue principale", "width": 1440, "height": 1920 },
+      { "src": "/images/brand-editorial-2.jpg", "alt": "vue alternative", "width": 1440, "height": 1918 },
+      { "src": "/images/brand-editorial-3.jpg", "alt": "détail", "width": 1440, "height": 1920 }
+    ],
+    "sizes": [
+      { "label": "XS", "value": "XS", "inStock": true },
+      { "label": "S", "value": "S", "inStock": true },
+      { "label": "M", "value": "M", "inStock": false },
+      { "label": "L", "value": "L", "inStock": true },
+      { "label": "XL", "value": "XL", "inStock": false },
+      { "label": "XXL", "value": "XXL", "inStock": true }
+    ],
+    "color": "Brun Profond",
+    "category": "clothing",
+    "genre": "UNISEXE",
+    "status": "sale",
+    "stock": 10,
+    "description": "Première édition de la collection Marque WOG-STYLE. Un vestiaire audacieux construit autour de silhouettes fortes et de matières sélectionnées avec soin.",
+    "composition": "100% laine mérinos. Certification RWS. Teinture écologique.",
+    "tags": ["marque", "collection", "laine", "mérinos", "durable"],
+    "addedAt": "2024-01-10T10:00:00Z",
+    "featured": false
+  },
+  {
+    "id": "prod-009",
+    "slug": "wog-front-hero-homme",
+    "brand": "WOG Style",
+    "brandId": "wog-style",
+    "name": "Front Collection — Homme Signature",
+    "sku": "WOG-FRT1-009",
+    "price": 105000,
+    "originalPrice": null,
+    "currency": "XOF",
+    "images": ["/images/front-1.jpg", "/images/front-2.jpg"],
+    "mainImage": {
+      "src": "/images/front-1.jpg",
+      "alt": "WOG Style Front Collection Homme Signature — vue principale",
+      "width": 1147,
+      "height": 860
+    },
+    "hoverImage": {
+      "src": "/images/front-2.jpg",
+      "alt": "WOG Style Front Collection Homme Signature — vue alternative",
+      "width": 1147,
+      "height": 860
+    },
+    "gallery": [
+      { "src": "/images/front-1.jpg", "alt": "vue principale", "width": 1147, "height": 860 },
+      { "src": "/images/front-2.jpg", "alt": "vue alternative", "width": 1147, "height": 860 }
+    ],
+    "sizes": [
+      { "label": "S", "value": "S", "inStock": true },
+      { "label": "M", "value": "M", "inStock": true },
+      { "label": "L", "value": "L", "inStock": true },
+      { "label": "XL", "value": "XL", "inStock": true }
+    ],
+    "color": "Neutre",
+    "category": "clothing",
+    "genre": "HOMME",
+    "status": "standard",
+    "stock": 18,
+    "description": "La pièce signature de la gamme Front Collection WOG-STYLE pour homme. Un vêtement pensé comme une fondation de garde-robe — polyvalent, durable, et immédiatement reconnaissable par ses détails distinctifs.",
+    "composition": "Coton pima longue fibre. Teint en fil. Coutures renforcées.",
+    "tags": ["homme", "signature", "front", "basique premium", "intemporel"],
+    "addedAt": "2024-01-05T10:00:00Z",
+    "featured": true
+  },
+  {
+    "id": "prod-010",
+    "slug": "wog-front-hero-femme",
+    "brand": "WOG Style",
+    "brandId": "wog-style",
+    "name": "Front Collection — Femme Signature",
+    "sku": "WOG-FRT2-010",
+    "price": 97000,
+    "originalPrice": null,
+    "currency": "XOF",
+    "images": ["/images/front-3.jpg", "/images/prod-f1-main.jpg"],
+    "mainImage": {
+      "src": "/images/front-3.jpg",
+      "alt": "WOG Style Front Collection Femme Signature — vue principale",
+      "width": 1024,
+      "height": 1433
+    },
+    "hoverImage": {
+      "src": "/images/prod-f1-main.jpg",
+      "alt": "WOG Style Front Collection Femme Signature — vue alternative",
+      "width": 1440,
+      "height": 1920
+    },
+    "gallery": [
+      { "src": "/images/front-3.jpg", "alt": "vue principale", "width": 1024, "height": 1433 },
+      { "src": "/images/prod-f1-main.jpg", "alt": "détail", "width": 1440, "height": 1920 }
+    ],
+    "sizes": [
+      { "label": "XS", "value": "XS", "inStock": true },
+      { "label": "S", "value": "S", "inStock": true },
+      { "label": "M", "value": "M", "inStock": true },
+      { "label": "L", "value": "L", "inStock": false }
+    ],
+    "color": "Ivoire",
+    "category": "clothing",
+    "genre": "FEMME",
+    "status": "standard",
+    "stock": 14,
+    "description": "La version féminine de la pièce signature Front Collection WOG-STYLE. Une coupe pensée sur mesure pour la silhouette féminine, avec un tombé naturel et une longueur travaillée pour flatter toutes les morphologies.",
+    "composition": "Viscose ECOVERO. Certification environnementale. Doux et respirant.",
+    "tags": ["femme", "signature", "front", "ivoire", "éco-responsable"],
+    "addedAt": "2024-01-08T10:00:00Z",
+    "featured": false
+  },
+  {
+    "id": "prod-011",
+    "slug": "wog-padre-drop-special",
+    "brand": "WOG Style",
+    "brandId": "wog-style",
+    "name": "Padre Drop — Pièce Spéciale",
+    "sku": "WOG-PAD-011",
+    "price": 147000,
+    "originalPrice": null,
+    "currency": "XOF",
+    "images": ["/images/hero-3.jpg", "/images/brand-editorial-3.jpg"],
+    "mainImage": {
+      "src": "/images/hero-3.jpg",
+      "alt": "WOG Style Padre Drop Pièce Spéciale — vue principale",
+      "width": 1440,
+      "height": 2048
+    },
+    "hoverImage": {
+      "src": "/images/brand-editorial-3.jpg",
+      "alt": "WOG Style Padre Drop Pièce Spéciale — vue alternative",
+      "width": 1440,
+      "height": 1920
+    },
+    "gallery": [
+      { "src": "/images/hero-3.jpg", "alt": "vue principale", "width": 1440, "height": 2048 },
+      { "src": "/images/brand-editorial-3.jpg", "alt": "détail", "width": 1440, "height": 1920 }
+    ],
+    "sizes": [
+      { "label": "S", "value": "S", "inStock": true },
+      { "label": "M", "value": "M", "inStock": true },
+      { "label": "L", "value": "L", "inStock": true },
+      { "label": "XL", "value": "XL", "inStock": true },
+      { "label": "XXL", "value": "XXL", "inStock": false }
+    ],
+    "color": "Sombre",
+    "category": "clothing",
+    "genre": "HOMME",
+    "status": "exclusive",
+    "stock": 7,
+    "description": "Le Padre Drop est une pièce hors-norme dans l'univers WOG-STYLE. Inspirée des tenues de scène et du vestiaire de nuit, elle combine élégance brute et confort maximal. Une pièce qui commande le respect.",
+    "composition": "Satin polyester haute qualité. Doublure mesh respirant. Fermeture invisible.",
+    "tags": ["padre", "drop", "spécial", "nuit", "élégance"],
+    "addedAt": "2024-02-01T10:00:00Z",
+    "featured": true
+  },
+  {
+    "id": "prod-012",
+    "slug": "wog-slide-capsule-unisex",
+    "brand": "WOG Style",
+    "brandId": "wog-style",
+    "name": "Capsule Slide — Unisexe",
+    "sku": "WOG-SL-012",
+    "price": 65000,
+    "originalPrice": 78000,
+    "currency": "XOF",
+    "images": ["/images/hero-2.jpg", "/images/editorial-1.jpg"],
+    "mainImage": {
+      "src": "/images/hero-2.jpg",
+      "alt": "WOG Style Capsule Slide Unisexe — vue principale",
+      "width": 1440,
+      "height": 1920
+    },
+    "hoverImage": {
+      "src": "/images/editorial-1.jpg",
+      "alt": "WOG Style Capsule Slide Unisexe — vue alternative",
+      "width": 1440,
+      "height": 1920
+    },
+    "gallery": [
+      { "src": "/images/hero-2.jpg", "alt": "vue principale", "width": 1440, "height": 1920 },
+      { "src": "/images/editorial-1.jpg", "alt": "vue alternative", "width": 1440, "height": 1920 }
+    ],
+    "sizes": [
+      { "label": "XS", "value": "XS", "inStock": true },
+      { "label": "S", "value": "S", "inStock": true },
+      { "label": "M", "value": "M", "inStock": true },
+      { "label": "L", "value": "L", "inStock": true },
+      { "label": "XL", "value": "XL", "inStock": false },
+      { "label": "XXL", "value": "XXL", "inStock": false }
+    ],
+    "color": "Gris Anthracite",
+    "category": "clothing",
+    "genre": "UNISEXE",
+    "status": "sale",
+    "stock": 22,
+    "description": "La capsule Slide WOG-STYLE rassemble les fondamentaux de la marque en une collection accessible et immédiatement portable. Conçue pour glisser dans tous les styles et toutes les occasions, sans effort.",
+    "composition": "Coton recyclé. Impression sérigraphie eau. Packaging zéro déchet.",
+    "tags": ["capsule", "slide", "unisexe", "accessible", "éco"],
+    "addedAt": "2024-01-03T10:00:00Z",
+    "featured": false
+  }
+]
