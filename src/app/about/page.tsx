@@ -10,7 +10,7 @@ import Link from 'next/link'
 export const metadata: Metadata = {
   title: 'À propos | WOG-STYLE',
   description:
-    "Découvrez l'histoire et les valeurs de WOG-STYLE — une marque de mode contemporaine née en Afrique de l'Ouest, entre authenticité et créativité.",
+    "Découvrez l'histoire et les valeurs de WOG-STYLE — une marque de mode contemporaine née à Abidjan, Côte d'Ivoire, entre authenticité et créativité.",
 }
 
 export default function AboutPage() {
@@ -64,7 +64,7 @@ export default function AboutPage() {
                 2022 — Fondation
               </p>
               <h2 className="text-3xl font-black uppercase leading-tight text-end-black mb-8">
-                Née dans les rues de Dakar,<br />portée par le monde.
+                Née à Abidjan,<br />portée par le monde.
               </h2>
               <div className="space-y-5 text-sm text-end-gray-dark leading-relaxed">
                 <p>
@@ -72,7 +72,7 @@ export default function AboutPage() {
                   Une mode qui n'imite pas, qui n'emprunte pas — une mode qui crée.
                 </p>
                 <p>
-                  Fondée à Dakar en 2022, la marque puise son inspiration dans la richesse des cultures
+                  Fondée à Abidjan, en Côte d'Ivoire, la marque puise son inspiration dans la richesse des cultures
                   d'Afrique de l'Ouest, dans l'énergie des villes, dans les artisans et les créatifs qui
                   fabriquent le monde de demain.
                 </p>
