@@ -11,7 +11,7 @@
 import type { Config } from 'tailwindcss'
 
 const config: Config = {
-  /* Chemins vers les fichiers contenant des classes Tailwind utilisées */
+  darkMode: 'class',
   content: [
     './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
     './src/components/**/*.{js,ts,jsx,tsx,mdx}',
@@ -40,6 +40,21 @@ const config: Config = {
         'end-gray-border': '#E0E0E0',
         /* Rouge vif pour les badges "Sale" et les prix soldés */
         'end-red': '#E53935',
+
+        /* ── Dashboard admin tokens ── */
+        'brand-25': '#f2f7ff', 'brand-50': '#ecf3ff', 'brand-100': '#dde9ff',
+        'brand-200': '#c2d6ff', 'brand-300': '#9cb9ff', 'brand-400': '#7592ff',
+        'brand-500': '#465fff', 'brand-600': '#3641f5', 'brand-700': '#2a31d8',
+        'brand-800': '#252dae', 'brand-900': '#262e89', 'brand-950': '#161950',
+        'success-50': '#f0fdf4', 'success-100': '#dcfce7', 'success-400': '#4ade80',
+        'success-500': '#22c55e', 'success-600': '#16a34a', 'success-700': '#15803d',
+        'error-50': '#fef2f2', 'error-100': '#fee2e2', 'error-400': '#f87171',
+        'error-500': '#ef4444', 'error-600': '#dc2626', 'error-700': '#b91c1c',
+        'warning-50': '#fff7ed', 'warning-100': '#ffedd5', 'warning-400': '#fb923c',
+        'warning-500': '#f97316', 'warning-600': '#ea580c',
+        'blue-light-50': '#f0f9ff', 'blue-light-100': '#e0f2fe', 'blue-light-200': '#b9e6fe',
+        'blue-light-400': '#36bffa', 'blue-light-500': '#0ba5ec', 'blue-light-600': '#0086c9',
+        'gray-dark': '#101828',
         /* Fond du header et du footer : noir quasi-pur */
         'end-header': '#111111',
         /* Couleur d'accentuation légère pour les survols */
@@ -64,6 +79,10 @@ const config: Config = {
        * Système typographique cohérent avec les proportions du site END.
        */
       fontSize: {
+        'theme-xs': ['0.75rem', { lineHeight: '1.125rem' }],
+        'theme-sm': ['0.875rem', { lineHeight: '1.25rem' }],
+        'theme-xl': ['1.25rem', { lineHeight: '1.875rem' }],
+        'title-sm': ['1.875rem', { lineHeight: '2.375rem' }],
         /* Micro-texte : mentions légales, labels de filtres */
         '2xs': ['0.625rem', { lineHeight: '1rem' }],
         /* Petit texte : descriptions secondaires, métadonnées */
@@ -151,18 +170,8 @@ const config: Config = {
        * Hiérarchie de superposition des éléments flottants
        */
       zIndex: {
-        /* Arrière-plan des overlays */
-        '40': '40',
-        /* Mega-menu et dropdowns */
-        '50': '50',
-        /* Header sticky */
-        '60': '60',
-        /* Drawer panier */
-        '70': '70',
-        /* Toast notifications */
-        '80': '80',
-        /* Modales */
-        '90': '90',
+        '40': '40', '50': '50', '60': '60', '70': '70', '80': '80', '90': '90',
+        '9999': '9999', '99999': '99999',
       },
     },
   },
