@@ -35,7 +35,7 @@ export async function GET(req: NextRequest) {
         _count: { select: { commandes: true } },
       },
     })
-    return NextResponse.json({ utilisateurs })
+    return NextResponse.json({ users: utilisateurs })
   } catch (error) {
     console.error('[GET /api/admin/utilisateurs]', error)
     return NextResponse.json({ error: 'Erreur serveur.' }, { status: 500 })

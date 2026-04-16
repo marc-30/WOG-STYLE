@@ -28,7 +28,7 @@ const stripePromise = loadStripe(
   process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY ?? ''
 )
 
-type MethodePaiement = 'carte' | 'wave' | 'orange' | 'mtn'
+type MethodePaiement = 'carte' | 'wave' | 'orange' | 'mtn' | 'paypal'
 
 /* ============================================================
  * SOUS-COMPOSANT : FORMULAIRE CARTE STRIPE
@@ -218,48 +218,94 @@ export const PaiementClient: React.FC = () => {
   /* Montant simulé de la commande */
   const montantXOF = 45000
 
+  /* URLs marchands (configurables via variables d'environnement) */
+  const WAVE_URL = process.env.NEXT_PUBLIC_WAVE_MERCHANT_URL ?? null
+  const ORANGE_URL = process.env.NEXT_PUBLIC_ORANGE_MERCHANT_URL ?? null
+  const PAYPAL_URL = process.env.NEXT_PUBLIC_PAYPAL_MERCHANT_URL ?? null
+
   /* Méthodes de paiement */
-  const METHODES: { id: MethodePaiement; label: string; logo: React.ReactNode }[] = [
+  const METHODES: { id: MethodePaiement; label: string; sublabel: string; logo: React.ReactNode }[] = [
     {
       id: 'carte',
       label: 'Carte bancaire',
+      sublabel: 'Visa · Mastercard · AMEX',
       logo: (
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <rect x="2" y="5" width="20" height="14" rx="2" stroke="currentColor" strokeWidth="1.5" />
-          <path d="M2 10h20" stroke="currentColor" strokeWidth="1.5" />
-          <rect x="5" y="13" width="4" height="2" rx="0.5" fill="currentColor" />
-        </svg>
+        <div className="flex items-center justify-center gap-1">
+          {/* Visa */}
+          <svg width="32" height="20" viewBox="0 0 32 20" fill="none" aria-label="Visa">
+            <rect width="32" height="20" rx="3" fill="#1A1F71"/>
+            <text x="4" y="14" fontSize="9" fontWeight="900" fill="white" fontFamily="Arial">VISA</text>
+          </svg>
+          {/* Mastercard */}
+          <svg width="28" height="18" viewBox="0 0 28 18" fill="none" aria-label="Mastercard">
+            <circle cx="10" cy="9" r="8" fill="#EB001B"/>
+            <circle cx="18" cy="9" r="8" fill="#F79E1B"/>
+            <path d="M14 3.5c1.8 1.4 3 3.5 3 5.5s-1.2 4.1-3 5.5C12.2 13.1 11 11 11 9s1.2-4.1 3-5.5z" fill="#FF5F00"/>
+          </svg>
+        </div>
       ),
     },
     {
       id: 'wave',
       label: 'Wave',
+      sublabel: 'Paiement instantané',
       logo: (
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <path d="M3 12C3 7 12 3 19 8" stroke="#1DA9FF" strokeWidth="2.5" strokeLinecap="round" />
-          <path d="M5 16C5 11 14 7 21 12" stroke="#1DA9FF" strokeWidth="2" strokeLinecap="round" />
-          <path d="M7 20C7 15 16 11 21 16" stroke="#1DA9FF" strokeWidth="1.5" strokeLinecap="round" />
-        </svg>
+        <div className="flex flex-col items-center justify-center">
+          {/* Logo Wave CI authentique */}
+          <svg width="36" height="24" viewBox="0 0 36 24" fill="none" aria-label="Wave">
+            <rect width="36" height="24" rx="4" fill="#1DA9FF"/>
+            <path d="M6 16c1.5-4 5-8 10-8s8.5 4 10 8" stroke="white" strokeWidth="2.5" strokeLinecap="round"/>
+            <path d="M8 18c1-3 4-6 8-6s7 3 8 6" stroke="white" strokeWidth="2" strokeLinecap="round" strokeOpacity="0.7"/>
+            <text x="5" y="11" fontSize="6" fontWeight="bold" fill="white">wave</text>
+          </svg>
+        </div>
       ),
     },
     {
       id: 'orange',
       label: 'Orange Money',
+      sublabel: 'Mobile Money CI',
       logo: (
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <circle cx="12" cy="12" r="9" fill="#FF6600" />
-          <circle cx="12" cy="12" r="5" fill="white" />
-        </svg>
+        <div className="flex flex-col items-center justify-center">
+          {/* Logo Orange Money */}
+          <svg width="36" height="24" viewBox="0 0 36 24" fill="none" aria-label="Orange Money">
+            <rect width="36" height="24" rx="4" fill="#FF6600"/>
+            <circle cx="14" cy="12" r="7" fill="white"/>
+            <circle cx="14" cy="12" r="4" fill="#FF6600"/>
+            <text x="22" y="15" fontSize="5.5" fontWeight="bold" fill="white" fontFamily="Arial">Money</text>
+          </svg>
+        </div>
       ),
     },
     {
       id: 'mtn',
       label: 'MTN Money',
+      sublabel: 'Mobile Money',
       logo: (
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <rect x="2" y="6" width="20" height="12" rx="2" fill="#FFCC00" />
-          <text x="6" y="16" fontSize="8" fontWeight="bold" fill="#000">MTN</text>
-        </svg>
+        <div className="flex flex-col items-center justify-center">
+          <svg width="36" height="24" viewBox="0 0 36 24" fill="none" aria-label="MTN Mobile Money">
+            <rect width="36" height="24" rx="4" fill="#FFCC00"/>
+            <text x="3" y="10" fontSize="7" fontWeight="900" fill="#333" fontFamily="Arial">MTN</text>
+            <text x="2" y="19" fontSize="5.5" fontWeight="bold" fill="#333" fontFamily="Arial">Mobile Money</text>
+          </svg>
+        </div>
+      ),
+    },
+    {
+      id: 'paypal',
+      label: 'PayPal',
+      sublabel: 'Paiement mondial sécurisé',
+      logo: (
+        <div className="flex flex-col items-center justify-center">
+          {/* Logo PayPal */}
+          <svg width="36" height="24" viewBox="0 0 36 24" fill="none" aria-label="PayPal">
+            <rect width="36" height="24" rx="4" fill="#003087"/>
+            <text x="5" y="10" fontSize="7" fontWeight="900" fill="#009CDE" fontFamily="Arial">Pay</text>
+            <text x="16" y="10" fontSize="7" fontWeight="900" fill="white" fontFamily="Arial">Pal</text>
+            <path d="M8 14c3-1 8-1.5 12-0.5" stroke="#009CDE" strokeWidth="1.5" strokeLinecap="round"/>
+            <text x="5" y="20" fontSize="5" fill="#87CEEB" fontFamily="Arial">paypal.com</text>
+          </svg>
+        </div>
       ),
     },
   ]
@@ -329,7 +375,7 @@ export const PaiementClient: React.FC = () => {
               </h1>
 
               {/* Sélecteur de méthode */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-8">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-8">
                 {METHODES.map((m) => (
                   <button
                     key={m.id}
@@ -337,15 +383,16 @@ export const PaiementClient: React.FC = () => {
                     onClick={() => setMethode(m.id)}
                     className={`flex flex-col items-center gap-2 p-3 border-2 transition-all ${
                       methode === m.id
-                        ? 'border-end-black bg-end-white'
+                        ? 'border-end-black bg-end-white shadow-sm'
                         : 'border-end-gray-border hover:border-end-gray-mid'
                     }`}
                     aria-pressed={methode === m.id}
                   >
                     {m.logo}
-                    <span className="text-xs font-semibold text-end-black text-center leading-tight">
-                      {m.label}
-                    </span>
+                    <div className="text-center">
+                      <span className="block text-xs font-semibold text-end-black leading-tight">{m.label}</span>
+                      <span className="block text-[10px] text-end-gray-mid leading-tight mt-0.5">{m.sublabel}</span>
+                    </div>
                   </button>
                 ))}
               </div>
@@ -360,104 +407,156 @@ export const PaiementClient: React.FC = () => {
                 </Elements>
               )}
 
-              {/* ===== MOBILE MONEY (Wave / Orange / MTN) ===== */}
-              {(methode === 'wave' || methode === 'orange' || methode === 'mtn') && (
+              {/* ===== WAVE ===== */}
+              {methode === 'wave' && (
+                <div className="space-y-5">
+                  <div className="p-4 rounded border-l-4 border-[#1DA9FF] bg-blue-50 flex items-start gap-3">
+                    <svg width="32" height="32" viewBox="0 0 36 24" fill="none" className="flex-shrink-0 mt-0.5">
+                      <rect width="36" height="24" rx="4" fill="#1DA9FF"/>
+                      <path d="M6 16c1.5-4 5-8 10-8s8.5 4 10 8" stroke="white" strokeWidth="2.5" strokeLinecap="round"/>
+                      <path d="M8 18c1-3 4-6 8-6s7 3 8 6" stroke="white" strokeWidth="2" strokeLinecap="round" strokeOpacity="0.7"/>
+                      <text x="5" y="11" fontSize="6" fontWeight="bold" fill="white">wave</text>
+                    </svg>
+                    <div>
+                      <p className="text-xs font-bold text-end-black mb-1">Paiement via Wave CI</p>
+                      <p className="text-xs text-end-gray-dark">Vous serez redirigé vers le lien de paiement Wave marchand WOG. Acceptez depuis votre app Wave.</p>
+                    </div>
+                  </div>
+                  {WAVE_URL ? (
+                    <a href={`${WAVE_URL}?amount=${montantXOF}`} target="_blank" rel="noopener noreferrer"
+                      className="flex items-center justify-center gap-3 w-full py-4 text-xs font-bold uppercase tracking-widest text-white transition-opacity hover:opacity-90"
+                      style={{ background: '#1DA9FF' }}>
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                      Payer {montantXOF.toLocaleString('fr-FR')} XOF avec Wave
+                    </a>
+                  ) : (
+                    <div className="space-y-3">
+                      <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 px-3 py-2 rounded">
+                        Le lien de paiement Wave marchande sera disponible prochainement. En attendant, utilisez la méthode manuelle ci-dessous.
+                      </p>
+                      <form onSubmit={handleMobilePay} className="space-y-3">
+                        <input type="tel" value={telephone} onChange={e => setTelephone(e.target.value)}
+                          placeholder="+225 07 00 00 00 00" required
+                          className="w-full border border-end-gray-border px-4 py-3 text-sm focus:outline-none focus:border-end-black" />
+                        <button type="submit" disabled={loading}
+                          className="w-full py-4 text-xs font-bold uppercase tracking-widest text-white transition-opacity hover:opacity-90 disabled:opacity-50 flex items-center justify-center gap-3"
+                          style={{ background: '#1DA9FF' }}>
+                          {loading ? 'Traitement...' : `Confirmer — ${montantXOF.toLocaleString('fr-FR')} XOF`}
+                        </button>
+                      </form>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* ===== ORANGE MONEY ===== */}
+              {methode === 'orange' && (
+                <div className="space-y-5">
+                  <div className="p-4 rounded border-l-4 border-[#FF6600] bg-orange-50 flex items-start gap-3">
+                    <svg width="32" height="32" viewBox="0 0 36 24" fill="none" className="flex-shrink-0 mt-0.5">
+                      <rect width="36" height="24" rx="4" fill="#FF6600"/>
+                      <circle cx="14" cy="12" r="7" fill="white"/>
+                      <circle cx="14" cy="12" r="4" fill="#FF6600"/>
+                    </svg>
+                    <div>
+                      <p className="text-xs font-bold text-end-black mb-1">Orange Money CI</p>
+                      <p className="text-xs text-end-gray-dark">Paiement sécurisé via Orange Money Côte d&apos;Ivoire.</p>
+                    </div>
+                  </div>
+                  {ORANGE_URL ? (
+                    <a href={ORANGE_URL} target="_blank" rel="noopener noreferrer"
+                      className="flex items-center justify-center gap-3 w-full py-4 text-xs font-bold uppercase tracking-widest text-white transition-opacity hover:opacity-90"
+                      style={{ background: '#FF6600' }}>
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                      Payer {montantXOF.toLocaleString('fr-FR')} XOF avec Orange Money
+                    </a>
+                  ) : (
+                    <div className="space-y-3">
+                      <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 px-3 py-2 rounded">
+                        Le lien de paiement Orange Money sera disponible prochainement.
+                      </p>
+                      <form onSubmit={handleMobilePay} className="space-y-3">
+                        <input type="tel" value={telephone} onChange={e => setTelephone(e.target.value)}
+                          placeholder="+225 07 00 00 00 00" required
+                          className="w-full border border-end-gray-border px-4 py-3 text-sm focus:outline-none focus:border-end-black" />
+                        <button type="submit" disabled={loading}
+                          className="w-full py-4 text-xs font-bold uppercase tracking-widest text-white transition-opacity hover:opacity-90 disabled:opacity-50"
+                          style={{ background: '#FF6600' }}>
+                          {loading ? 'Traitement...' : `Confirmer — ${montantXOF.toLocaleString('fr-FR')} XOF`}
+                        </button>
+                      </form>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* ===== MTN MONEY ===== */}
+              {methode === 'mtn' && (
                 <form onSubmit={handleMobilePay} className="space-y-5">
-
-                  {/* Info opérateur */}
-                  <div className={`p-4 rounded border-l-4 ${
-                    methode === 'wave' ? 'border-[#1DA9FF] bg-blue-50' :
-                    methode === 'orange' ? 'border-[#FF6600] bg-orange-50' :
-                    'border-[#FFCC00] bg-yellow-50'
-                  }`}>
-                    <p className="text-xs font-bold text-end-black mb-1">
-                      {methode === 'wave' ? 'Paiement via Wave' :
-                       methode === 'orange' ? 'Paiement via Orange Money' :
-                       'Paiement via MTN Money'}
-                    </p>
-                    <p className="text-xs text-end-gray-dark">
-                      {methode === 'wave'
-                        ? "Entrez votre numéro Wave. Vous recevrez une demande sur votre app."
-                        : methode === 'orange'
-                        ? "Entrez votre numéro Orange Money. Un code USSD vous sera envoyé."
-                        : "Entrez votre numéro MTN. Confirmez depuis votre menu Mobile Money."}
-                    </p>
+                  <div className="p-4 rounded border-l-4 border-[#FFCC00] bg-yellow-50 flex items-start gap-3">
+                    <svg width="32" height="32" viewBox="0 0 36 24" fill="none" className="flex-shrink-0 mt-0.5">
+                      <rect width="36" height="24" rx="4" fill="#FFCC00"/>
+                      <text x="3" y="10" fontSize="8" fontWeight="900" fill="#333" fontFamily="Arial">MTN</text>
+                      <text x="2" y="20" fontSize="5" fontWeight="bold" fill="#333" fontFamily="Arial">Mobile Money</text>
+                    </svg>
+                    <div>
+                      <p className="text-xs font-bold text-end-black mb-1">MTN Mobile Money</p>
+                      <p className="text-xs text-end-gray-dark">Entrez votre numéro MTN et confirmez depuis votre menu Mobile Money.</p>
+                    </div>
                   </div>
+                  <input type="tel" value={telephone} onChange={e => setTelephone(e.target.value)}
+                    placeholder="+225 05 00 00 00 00 (MTN)" required
+                    className="w-full border border-end-gray-border px-4 py-3 text-sm focus:outline-none focus:border-end-black" />
+                  <button type="submit" disabled={loading}
+                    className="w-full py-4 text-xs font-bold uppercase tracking-widest text-black transition-opacity hover:opacity-80 disabled:opacity-50 flex items-center justify-center gap-3"
+                    style={{ background: '#FFCC00' }}>
+                    {loading ? 'Traitement...' : `Confirmer — ${montantXOF.toLocaleString('fr-FR')} XOF`}
+                  </button>
+                </form>
+              )}
 
-                  <div>
-                    <label htmlFor="telephone" className="block text-xs font-semibold uppercase tracking-wider text-end-black mb-2">
-                      Numéro de téléphone
-                    </label>
-                    <input
-                      id="telephone"
-                      type="tel"
-                      inputMode="tel"
-                      value={telephone}
-                      onChange={(e) => setTelephone(e.target.value)}
-                      placeholder="+225 07 00 00 00 00"
-                      required
-                      autoComplete="tel"
-                      className="w-full border border-end-gray-border px-4 py-3 text-sm focus:outline-none focus:border-end-black transition-colors"
-                    />
+              {/* ===== PAYPAL ===== */}
+              {methode === 'paypal' && (
+                <div className="space-y-5">
+                  <div className="p-4 rounded border-l-4 border-[#003087] bg-blue-50 flex items-start gap-3">
+                    <svg width="32" height="32" viewBox="0 0 36 24" fill="none" className="flex-shrink-0 mt-0.5">
+                      <rect width="36" height="24" rx="4" fill="#003087"/>
+                      <text x="5" y="10" fontSize="8" fontWeight="900" fill="#009CDE" fontFamily="Arial">Pay</text>
+                      <text x="18" y="10" fontSize="8" fontWeight="900" fill="white" fontFamily="Arial">Pal</text>
+                      <path d="M5 14c5-1.5 16-1.5 21 0" stroke="#009CDE" strokeWidth="1.5" strokeLinecap="round"/>
+                    </svg>
+                    <div>
+                      <p className="text-xs font-bold text-end-black mb-1">PayPal — Paiement international</p>
+                      <p className="text-xs text-end-gray-dark">Payez en toute sécurité avec votre compte PayPal depuis n&apos;importe où dans le monde.</p>
+                    </div>
                   </div>
-
-                  {/* Étapes */}
-                  <div className="space-y-2">
-                    {(methode === 'wave' ? [
-                      'Entrez votre numéro Wave ci-dessus',
-                      'Cliquez sur "Confirmer le paiement"',
-                      "Ouvrez votre app Wave et acceptez la demande",
-                      'Votre commande est validée automatiquement',
-                    ] : methode === 'orange' ? [
-                      'Entrez votre numéro Orange Money',
-                      'Cliquez sur "Confirmer le paiement"',
-                      'Composez le code USSD reçu par SMS',
-                      'Entrez votre code secret Orange Money',
-                    ] : [
-                      'Entrez votre numéro MTN Mobile Money',
-                      'Cliquez sur "Confirmer le paiement"',
-                      'Accédez à votre menu Mobile Money MTN',
-                      'Approuvez la demande de paiement',
-                    ]).map((step, i) => (
-                      <div key={i} className="flex items-start gap-3">
-                        <span className="flex-shrink-0 w-5 h-5 rounded-full bg-end-black text-end-white text-xs flex items-center justify-center font-bold">
-                          {i + 1}
-                        </span>
-                        <span className="text-xs text-end-gray-dark">{step}</span>
+                  {PAYPAL_URL ? (
+                    <a href={PAYPAL_URL} target="_blank" rel="noopener noreferrer"
+                      className="flex items-center justify-center gap-3 w-full py-4 text-xs font-bold uppercase tracking-widest text-white transition-opacity hover:opacity-90"
+                      style={{ background: '#003087' }}>
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                      Payer via PayPal
+                    </a>
+                  ) : (
+                    <div>
+                      <div className="text-xs text-amber-700 bg-amber-50 border border-amber-200 px-3 py-2 rounded mb-4">
+                        Le lien de paiement PayPal sera disponible prochainement. En attendant, contactez-nous directement.
                       </div>
-                    ))}
-                  </div>
-
-                  {/* Badge sécurité */}
-                  <div className="flex items-center gap-2 py-3 border-t border-end-gray-border">
+                      <Link href="/contact"
+                        className="flex items-center justify-center w-full py-4 text-xs font-bold uppercase tracking-widest text-white transition-opacity hover:opacity-90"
+                        style={{ background: '#003087' }}>
+                        Nous contacter pour PayPal
+                      </Link>
+                    </div>
+                  )}
+                  <div className="flex items-center gap-2 py-2 border-t border-end-gray-border">
                     <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="text-green-600 flex-shrink-0">
                       <path d="M7 1.5L2 3.5v4c0 2.5 2.2 4.8 5 5.5 2.8-.7 5-3 5-5.5v-4L7 1.5Z" stroke="currentColor" strokeWidth="1.2" />
                       <path d="M5 7l1.5 1.5L9 5.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
-                    <span className="text-xs text-end-gray-mid">
-                      Paiement 100% sécurisé — vos données sont protégées
-                    </span>
+                    <span className="text-xs text-end-gray-mid">Paiement sécurisé par PayPal — Protection acheteur incluse</span>
                   </div>
-
-                  {/* Bouton */}
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="w-full bg-end-black text-end-white py-4 text-xs font-bold uppercase tracking-widest hover:opacity-80 transition-opacity disabled:opacity-50 flex items-center justify-center gap-3"
-                  >
-                    {loading ? (
-                      <>
-                        <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
-                          <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" strokeOpacity="0.2" />
-                          <path d="M12 2a10 10 0 0110 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                        </svg>
-                        Traitement en cours...
-                      </>
-                    ) : (
-                      `Confirmer — ${montantXOF.toLocaleString('fr-FR')} XOF`
-                    )}
-                  </button>
-                </form>
+                </div>
               )}
             </div>
           </div>
