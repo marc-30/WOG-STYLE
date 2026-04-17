@@ -24,6 +24,7 @@ export async function GET(req: NextRequest) {
       include: {
         images: { orderBy: { ordre: 'asc' } },
         tailles: { orderBy: { label: 'asc' } },
+        collection: { select: { id: true, slug: true, nom: true } },
         _count: { select: { lignesCommande: true } },
       },
     })
@@ -40,7 +41,7 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json()
-    const { nom, slug, description, prix, prixOriginal, marque, genre, statut, stock, actif, images, tailles } = body
+    const { nom, slug, description, prix, prixOriginal, marque, genre, statut, stock, actif, categorie, collectionId, images, tailles } = body
 
     if (!nom || !slug || !prix) {
       return NextResponse.json({ error: 'Nom, slug et prix requis.' }, { status: 400 })
@@ -50,7 +51,8 @@ export async function POST(req: NextRequest) {
     const existing = await prisma.produit.findUnique({ where: { slug } })
     if (existing) return NextResponse.json({ error: 'Ce slug existe déjà.' }, { status: 409 })
 
-    const produit = await prisma.produit.create({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const produit = await (prisma.produit.create as any)({
       data: {
         nom: nom.trim(),
         slug: slug.trim().toLowerCase().replace(/\s+/g, '-'),
@@ -62,6 +64,8 @@ export async function POST(req: NextRequest) {
         statut: statut ?? 'STANDARD',
         stock: parseInt(stock ?? '0'),
         actif: actif !== false,
+        categorie: categorie ?? 'vetements',
+        collectionId: collectionId ?? null,
         images: images?.length ? {
           create: images.map((url: string, i: number) => ({
             url,
@@ -80,6 +84,7 @@ export async function POST(req: NextRequest) {
       include: {
         images: { orderBy: { ordre: 'asc' } },
         tailles: true,
+        collection: { select: { id: true, slug: true, nom: true } },
       },
     })
 

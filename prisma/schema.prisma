@@ -64,6 +64,7 @@ model Produit {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
+  categorie     String    @default("vetements")
   collectionId  String?
   collection    Collection? @relation(fields: [collectionId], references: [id])
 

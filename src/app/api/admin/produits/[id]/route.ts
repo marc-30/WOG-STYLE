@@ -38,7 +38,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
 
   try {
     const body = await req.json()
-    const { nom, slug, description, prix, prixOriginal, marque, genre, statut, stock, actif, images, tailles } = body
+    const { nom, slug, description, prix, prixOriginal, marque, genre, statut, stock, actif, categorie, collectionId, images, tailles } = body
 
     const updateData: Record<string, unknown> = {}
     if (nom !== undefined) updateData.nom = nom.trim()
@@ -51,6 +51,8 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     if (statut !== undefined) updateData.statut = statut
     if (stock !== undefined) updateData.stock = parseInt(stock)
     if (actif !== undefined) updateData.actif = Boolean(actif)
+    if (categorie !== undefined) updateData.categorie = categorie
+    if (collectionId !== undefined) updateData.collectionId = collectionId || null
 
     // Mise à jour atomique : supprimer et recréer images/tailles si fournis
     if (images !== undefined) {
@@ -84,7 +86,11 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     const produit = await prisma.produit.update({
       where: { id: params.id },
       data: updateData,
-      include: { images: { orderBy: { ordre: 'asc' } }, tailles: true },
+      include: {
+        images: { orderBy: { ordre: 'asc' } },
+        tailles: true,
+        collection: { select: { id: true, slug: true, nom: true } },
+      },
     })
 
     return NextResponse.json({ produit })

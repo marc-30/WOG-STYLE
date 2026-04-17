@@ -62,6 +62,53 @@ export const NAV_ITEMS: NavItem[] = [
     ],
   },
   {
+    label: 'Ma Boutique',
+    href: '/boutique',
+    hasMegaMenu: true,
+    megaMenuColumns: [
+      {
+        title: 'Genre',
+        links: [
+          { label: 'Tous les articles', href: '/boutique', highlighted: true },
+          { label: 'Homme', href: '/boutique?genre=HOMME' },
+          { label: 'Femme', href: '/boutique?genre=FEMME' },
+          { label: 'Unisexe', href: '/boutique?genre=UNISEXE' },
+        ],
+      },
+      {
+        title: 'Catégories',
+        links: [
+          { label: 'Vêtements', href: '/boutique?categorie=vetements' },
+          { label: 'Accessoires', href: '/boutique?categorie=accessoires' },
+          { label: 'Éditions limitées', href: '/boutique?categorie=editions-limitees' },
+        ],
+      },
+      {
+        title: 'Collections',
+        links: [
+          { label: 'Collection GENÈSE', href: '/boutique?collection=genese' },
+          { label: 'Nouveautés', href: '/boutique?statut=NEW' },
+          { label: 'Exclusivités', href: '/boutique?statut=EXCLUSIVE' },
+          { label: 'Soldes', href: '/boutique?statut=SALE' },
+        ],
+      },
+    ],
+    megaMenuImages: [
+      {
+        imageSrc: '/images/prod-h1-main.jpg',
+        imageAlt: 'Ma Boutique WOG-STYLE',
+        title: 'Nouveautés',
+        href: '/boutique?statut=NEW',
+      },
+      {
+        imageSrc: '/images/prod-f1-main.jpg',
+        imageAlt: 'Collection Femme WOG-STYLE',
+        title: 'Collection Femme',
+        href: '/boutique?genre=FEMME',
+      },
+    ],
+  },
+  {
     label: 'À propos',
     href: '/about',
     hasMegaMenu: false,

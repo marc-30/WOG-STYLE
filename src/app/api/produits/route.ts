@@ -1,6 +1,6 @@
 /**
- * GET /api/produits — Produits publics pour le store (lecture seule)
- * Lit depuis la DB. Fallback vers le JSON si DB vide.
+ * GET /api/produits — Produits publics pour la boutique (lecture seule)
+ * Lit depuis la DB avec images, tailles et collection.
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
@@ -12,12 +12,16 @@ export async function GET(req: NextRequest) {
   const genre = searchParams.get('genre')
   const statut = searchParams.get('statut')
   const slug = searchParams.get('slug')
+  const categorie = searchParams.get('categorie')
+  const collectionSlug = searchParams.get('collection')
 
   try {
     const where: Record<string, unknown> = { actif: true }
     if (genre) where.genre = genre.toUpperCase()
     if (statut) where.statut = statut.toUpperCase()
     if (slug) where.slug = slug
+    if (categorie) where.categorie = categorie
+    if (collectionSlug) where.collection = { slug: collectionSlug }
 
     const produits = await prisma.produit.findMany({
       where,
@@ -25,10 +29,10 @@ export async function GET(req: NextRequest) {
       include: {
         images: { orderBy: { ordre: 'asc' } },
         tailles: { orderBy: { label: 'asc' } },
+        collection: { select: { id: true, slug: true, nom: true } },
       },
     })
 
-    // Si la DB est vide, on indique qu'il faut seeder
     return NextResponse.json({ produits, total: produits.length })
   } catch (error) {
     console.error('[GET /api/produits]', error)
