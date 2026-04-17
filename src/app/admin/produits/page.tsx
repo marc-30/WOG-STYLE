@@ -167,12 +167,20 @@ export default function AdminProduitsPage() {
   }
 
   const handleSeed = async () => {
-    if (!confirm('Initialiser la base avec les 12 produits WOG ? (uniquement si la DB est vide)')) return
+    if (!confirm('Initialiser la base avec les 15 produits WOG ? (uniquement si la DB est vide)')) return
     setSeeding(true)
-    const res = await fetch('/api/admin/seed', { method: 'POST' })
-    const d = await res.json().catch(() => ({}))
-    showMsg(d.message || (res.ok ? 'Initialisé.' : 'Erreur.'), res.ok ? 'ok' : 'err')
-    if (res.ok) fetchProduits()
+    try {
+      const res = await fetch('/api/admin/seed', { method: 'POST' })
+      const d = await res.json().catch(() => ({}))
+      if (res.ok) {
+        showMsg(d.message || 'Produits initialisés avec succès.', 'ok')
+        fetchProduits()
+      } else {
+        showMsg(d.error || d.message || `Erreur ${res.status} — vérifiez que vous êtes bien connecté en tant qu'admin.`, 'err')
+      }
+    } catch (err) {
+      showMsg('Erreur réseau. Vérifiez que le serveur tourne.', 'err')
+    }
     setSeeding(false)
   }
 
