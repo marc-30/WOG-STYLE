@@ -64,6 +64,7 @@ model Produit {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
+  categorie     String    @default("vetements")
   collectionId  String?
   collection    Collection? @relation(fields: [collectionId], references: [id])
 
@@ -156,6 +157,44 @@ model LigneCommande {
   produit      Produit  @relation(fields: [produitId], references: [id])
 
   @@map("commande_lignes")
+}
+
+// ── Tâches admin ─────────────────────────────────────────
+model Tache {
+  id          String       @id @default(cuid())
+  titre       String
+  description String?
+  priorite    Priorite     @default(MOYENNE)
+  statut      StatutTache  @default(A_FAIRE)
+  echeance    DateTime?
+  assignee    String?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@map("taches")
+}
+
+enum Priorite {
+  HAUTE
+  MOYENNE
+  BASSE
+}
+
+enum StatutTache {
+  A_FAIRE
+  EN_COURS
+  TERMINE
+}
+
+// ── Post-it admin ─────────────────────────────────────────
+model PostIt {
+  id        String   @id @default(cuid())
+  contenu   String
+  couleur   String   @default("yellow")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("postits")
 }
 
 // ── Panier persisté (utilisateur connecté) ───────────────
