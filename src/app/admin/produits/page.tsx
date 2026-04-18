@@ -5,11 +5,13 @@ import Badge from '../_components/Badge'
 
 interface ProduitImage { id?: string; url: string; ordre: number; isHover: boolean }
 interface ProduitTaille { id?: string; label: string; stock: number; disponible: boolean }
+interface CollectionItem { id: string; slug: string; nom: string }
 interface Produit {
   id: string; slug: string; nom: string; description: string | null
   prix: number; prixOriginal: number | null; marque: string
   genre: 'HOMME' | 'FEMME' | 'UNISEXE'; statut: 'STANDARD' | 'NEW' | 'EXCLUSIVE' | 'SALE'
-  stock: number; actif: boolean; createdAt: string
+  stock: number; actif: boolean; categorie: string; createdAt: string
+  collectionId: string | null; collection?: CollectionItem | null
   images: ProduitImage[]; tailles: ProduitTaille[]
   _count?: { lignesCommande: number }
 }
@@ -24,12 +26,14 @@ function emptyForm() {
   return {
     nom: '', slug: '', description: '', prix: '', prixOriginal: '',
     marque: 'WOG Style', genre: 'UNISEXE', statut: 'STANDARD', stock: '0', actif: true,
+    categorie: 'vetements', collectionId: '',
     images: [] as string[], tailles: TAILLES_DEFAULT.map(l => ({ label: l, stock: 0, disponible: true })),
   }
 }
 
 export default function AdminProduitsPage() {
   const [produits, setProduits] = useState<Produit[]>([])
+  const [collections, setCollections] = useState<CollectionItem[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [filterGenre, setFilterGenre] = useState('')
@@ -51,7 +55,13 @@ export default function AdminProduitsPage() {
       .finally(() => setLoading(false))
   }
 
-  useEffect(() => { fetchProduits() }, [])
+  useEffect(() => {
+    fetchProduits()
+    fetch('/api/admin/collections')
+      .then(r => r.ok ? r.json() : { collections: [] })
+      .then(d => setCollections(d.collections ?? []))
+      .catch(() => {})
+  }, [])
 
   const showMsg = (text: string, type: 'ok' | 'err' = 'ok') => {
     setMsg(text); setMsgType(type)
@@ -69,6 +79,8 @@ export default function AdminProduitsPage() {
       prix: String(p.prix), prixOriginal: p.prixOriginal ? String(p.prixOriginal) : '',
       marque: p.marque, genre: p.genre, statut: p.statut,
       stock: String(p.stock), actif: p.actif,
+      categorie: p.categorie ?? 'vetements',
+      collectionId: p.collectionId ?? '',
       images: p.images.map(i => i.url),
       tailles: p.tailles.length > 0
         ? p.tailles.map(t => ({ label: t.label, stock: t.stock, disponible: t.disponible }))
@@ -80,10 +92,14 @@ export default function AdminProduitsPage() {
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files ?? [])
     if (!files.length) return
+    // Max 4 images au total
+    const remaining = 4 - form.images.length
+    if (remaining <= 0) { showMsg('Maximum 4 images par produit.', 'err'); return }
+    const toUpload = files.slice(0, remaining)
     setUploading(true)
     try {
       const urls: string[] = []
-      for (const file of files) {
+      for (const file of toUpload) {
         const fd = new FormData()
         fd.append('file', file)
         const res = await fetch('/api/admin/upload', { method: 'POST', body: fd })
@@ -92,9 +108,9 @@ export default function AdminProduitsPage() {
           urls.push(url)
         }
       }
-      setForm(f => ({ ...f, images: [...f.images, ...urls] }))
+      setForm(f => ({ ...f, images: [...f.images, ...urls].slice(0, 4) }))
     } catch {
-      showMsg('Erreur lors de l\'upload.', 'err')
+      showMsg("Erreur lors de l'upload.", 'err')
     }
     setUploading(false)
     if (fileRef.current) fileRef.current.value = ''
@@ -118,6 +134,8 @@ export default function AdminProduitsPage() {
         prix: form.prix, prixOriginal: form.prixOriginal || null,
         marque: form.marque, genre: form.genre, statut: form.statut,
         stock: form.stock, actif: form.actif,
+        categorie: form.categorie || 'vetements',
+        collectionId: form.collectionId || null,
         images: form.images, tailles: form.tailles,
       }
 
@@ -149,12 +167,20 @@ export default function AdminProduitsPage() {
   }
 
   const handleSeed = async () => {
-    if (!confirm('Initialiser la base avec les 12 produits WOG ? (uniquement si la DB est vide)')) return
+    if (!confirm('Initialiser la base avec les 15 produits WOG ? (uniquement si la DB est vide)')) return
     setSeeding(true)
-    const res = await fetch('/api/admin/seed', { method: 'POST' })
-    const d = await res.json().catch(() => ({}))
-    showMsg(d.message || (res.ok ? 'Initialisé.' : 'Erreur.'), res.ok ? 'ok' : 'err')
-    if (res.ok) fetchProduits()
+    try {
+      const res = await fetch('/api/admin/seed', { method: 'POST' })
+      const d = await res.json().catch(() => ({}))
+      if (res.ok) {
+        showMsg(d.message || 'Produits initialisés avec succès.', 'ok')
+        fetchProduits()
+      } else {
+        showMsg(d.error || d.message || `Erreur ${res.status} — vérifiez que vous êtes bien connecté en tant qu'admin.`, 'err')
+      }
+    } catch (err) {
+      showMsg('Erreur réseau. Vérifiez que le serveur tourne.', 'err')
+    }
     setSeeding(false)
   }
 
@@ -303,9 +329,11 @@ export default function AdminProduitsPage() {
 
             <form onSubmit={handleSave} className="p-6 space-y-5 max-h-[80vh] overflow-y-auto">
 
-              {/* Images */}
+              {/* Images — max 4 */}
               <div>
-                <label className="block text-theme-xs font-medium text-gray-700 dark:text-gray-300 mb-2">Images du produit</label>
+                <label className="block text-theme-xs font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Images du produit <span className="text-gray-400 font-normal">({form.images.length}/4 max)</span>
+                </label>
                 <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 mb-2">
                   {form.images.map((url, i) => (
                     <div key={i} className="relative aspect-square rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700 group">
@@ -322,7 +350,7 @@ export default function AdminProduitsPage() {
                       </button>
                     </div>
                   ))}
-                  <label className={`aspect-square rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600 flex flex-col items-center justify-center cursor-pointer hover:border-brand-400 hover:bg-brand-50 dark:hover:bg-brand-500/5 transition-colors ${uploading ? 'opacity-50 pointer-events-none' : ''}`}>
+                  <label className={`aspect-square rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600 flex flex-col items-center justify-center cursor-pointer hover:border-brand-400 hover:bg-brand-50 dark:hover:bg-brand-500/5 transition-colors ${uploading || form.images.length >= 4 ? 'opacity-50 pointer-events-none' : ''}`}>
                     {uploading ? (
                       <svg className="animate-spin w-5 h-5 text-brand-500" viewBox="0 0 24 24" fill="none">
                         <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" strokeOpacity="0.2"/>
@@ -374,6 +402,27 @@ export default function AdminProduitsPage() {
                   <label className="block text-theme-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Prix barré (XOF)</label>
                   <input type="number" value={form.prixOriginal} onChange={e => setForm(f => ({ ...f, prixOriginal: e.target.value }))}
                     className={inputCls} placeholder="110000 (optionnel)" min="0" />
+                </div>
+              </div>
+
+              {/* Catégorie + Collection */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-theme-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Catégorie</label>
+                  <select value={form.categorie} onChange={e => setForm(f => ({ ...f, categorie: e.target.value }))} className={inputCls}>
+                    <option value="vetements">Vêtements</option>
+                    <option value="accessoires">Accessoires</option>
+                    <option value="editions-limitees">Éditions limitées</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-theme-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Collection</label>
+                  <select value={form.collectionId} onChange={e => setForm(f => ({ ...f, collectionId: e.target.value }))} className={inputCls}>
+                    <option value="">Aucune collection</option>
+                    {collections.map(c => (
+                      <option key={c.id} value={c.id}>{c.nom}</option>
+                    ))}
+                  </select>
                 </div>
               </div>
 
