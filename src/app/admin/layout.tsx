@@ -1,9 +1,7 @@
 'use client'
-/**
- * Admin layout — full-screen overlay (z-9999) couvrant le layout WOG store.
- * Gère sidebar collapsible + header + ThemeProvider + SidebarProvider.
- */
 
+import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { SidebarProvider, useSidebar } from './_components/SidebarContext'
 import { ThemeProvider } from './_components/ThemeContext'
 import AdminSidebar from './_components/AdminSidebar'
@@ -32,15 +30,40 @@ const AdminContent: React.FC<{ children: React.ReactNode }> = ({ children }) => 
   )
 }
 
+function AdminAuthGuard({ children }: { children: React.ReactNode }) {
+  const router = useRouter()
+  const [checked, setChecked] = useState(false)
+
+  useEffect(() => {
+    fetch('/api/auth/me')
+      .then(r => r.json())
+      .then(data => {
+        if (!data.user || data.user.role !== 'ADMIN') router.replace('/connexion')
+        else setChecked(true)
+      })
+      .catch(() => router.replace('/connexion'))
+  }, [router])
+
+  if (!checked) {
+    return (
+      <div className="fixed inset-0 z-[9999] bg-white flex items-center justify-center">
+        <div className="animate-spin w-8 h-8 border-2 border-brand-500 border-t-transparent rounded-full" />
+      </div>
+    )
+  }
+  return <>{children}</>
+}
+
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
-    <ThemeProvider>
-      <SidebarProvider>
-        {/* Full-screen overlay covering WOG header/footer */}
-        <div className="fixed inset-0 z-[9999] overflow-auto bg-gray-50 dark:bg-gray-950 font-sans">
-          <AdminContent>{children}</AdminContent>
-        </div>
-      </SidebarProvider>
-    </ThemeProvider>
+    <AdminAuthGuard>
+      <ThemeProvider>
+        <SidebarProvider>
+          <div className="fixed inset-0 z-[9999] overflow-auto bg-gray-50 dark:bg-gray-950 font-sans">
+            <AdminContent>{children}</AdminContent>
+          </div>
+        </SidebarProvider>
+      </ThemeProvider>
+    </AdminAuthGuard>
   )
 }

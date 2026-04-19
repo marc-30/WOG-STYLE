@@ -40,6 +40,8 @@ const config: Config = {
         'end-gray-border': '#E0E0E0',
         /* Rouge vif pour les badges "Sale" et les prix soldés */
         'end-red': '#E53935',
+        /* Bleu accent — boutons CTA, badges, barre top */
+        'end-blue': '#3641f5',
 
         /* ── Dashboard admin tokens ── */
         'brand-25': '#f2f7ff', 'brand-50': '#ecf3ff', 'brand-100': '#dde9ff',

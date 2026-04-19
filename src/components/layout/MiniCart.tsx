@@ -15,7 +15,6 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useCart } from '@/hooks/useCart'
-import { useAuth } from '@/hooks/useAuth'
 import { Button } from '@/components/ui/Button'
 import type { CartItem } from '@/types'
 
@@ -175,8 +174,6 @@ export const MiniCart: React.FC = () => {
     closeCart,
   } = useCart()
 
-  const { isAuthenticated, loaded } = useAuth()
-
   return (
     <AnimatePresence>
       {isOpen && (
@@ -244,38 +241,7 @@ export const MiniCart: React.FC = () => {
             {/* === CONTENU SCROLLABLE DU DRAWER === */}
             <div className="flex-1 overflow-y-auto px-4 drawer-scroll">
 
-              {/* ── Vérification de session (attend hydratation) ── */}
-              {loaded && !isAuthenticated ? (
-
-                /* === NON CONNECTÉ : invite à se connecter === */
-                <div className="flex flex-col items-center justify-center h-full py-16 text-center">
-                  <svg width="48" height="48" viewBox="0 0 48 48" fill="none" className="mb-6 text-end-gray-border">
-                    <circle cx="24" cy="16" r="9" stroke="currentColor" strokeWidth="1.5" />
-                    <path d="M6 44c0-9.9 8.06-18 18-18s18 8.1 18 18" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                  </svg>
-                  <p className="text-sm font-bold uppercase tracking-widest text-end-black mb-2">
-                    Connectez-vous pour voir votre panier
-                  </p>
-                  <p className="text-xs text-end-gray-mid mb-8 max-w-xs leading-relaxed">
-                    Accédez à votre panier, retrouvez vos commandes et profitez d'une expérience personnalisée.
-                  </p>
-                  <Link
-                    href="/connexion"
-                    onClick={closeCart}
-                    className="w-full max-w-xs bg-end-black text-end-white py-3 text-xs font-bold uppercase tracking-widest text-center hover:opacity-80 transition-opacity block mb-3"
-                  >
-                    Se connecter
-                  </Link>
-                  <Link
-                    href="/connexion"
-                    onClick={closeCart}
-                    className="w-full max-w-xs border border-end-gray-border text-end-black py-3 text-xs font-bold uppercase tracking-widest text-center hover:border-end-black transition-colors block"
-                  >
-                    Créer un compte
-                  </Link>
-                </div>
-
-              ) : isEmpty ? (
+              {isEmpty ? (
 
                 /* === CONNECTÉ MAIS PANIER VIDE === */
                 <div className="flex flex-col items-center justify-center h-full py-16 text-center">
@@ -310,9 +276,8 @@ export const MiniCart: React.FC = () => {
               )}
             </div>
 
-            {/* === PIED DU DRAWER : TOTAL ET CTA ===
-                Visible uniquement si connecté et panier non vide */}
-            {isAuthenticated && !isEmpty && (
+            {/* === PIED DU DRAWER : TOTAL ET CTA === */}
+            {!isEmpty && (
               <div className="flex-shrink-0 border-t border-end-gray-border px-4 py-4">
 
                 {/* Frais de livraison */}
@@ -335,7 +300,7 @@ export const MiniCart: React.FC = () => {
                 <Link
                   href="/paiement"
                   onClick={closeCart}
-                  className="block w-full bg-end-black text-end-white py-4 text-xs font-bold uppercase tracking-widest text-center hover:opacity-80 transition-opacity"
+                  className="block w-full bg-end-blue text-white py-4 text-xs font-bold uppercase tracking-widest text-center hover:opacity-80 transition-opacity"
                 >
                   Passer la commande
                 </Link>

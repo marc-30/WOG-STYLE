@@ -98,20 +98,20 @@ export const Header: React.FC = () => {
     <header className={`sticky top-0 z-60 bg-end-white transition-shadow duration-250 ${isScrolled ? 'shadow-end-header' : ''}`}>
 
       {/* ── TopBar ── */}
-      <div className="bg-end-black text-end-white">
+      <div className="bg-end-blue text-white">
         <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-9">
             <div className="flex items-center gap-0">
               <button type="button" onClick={() => setActiveGenre('men')}
-                className={`px-3 sm:px-4 h-9 text-xs font-semibold uppercase tracking-wider transition-colors ${activeGenre === 'men' ? 'bg-end-white text-end-black' : 'text-end-white/70 hover:text-end-white'}`}>
+                className={`px-3 sm:px-4 h-9 text-xs font-semibold uppercase tracking-wider transition-colors ${activeGenre === 'men' ? 'bg-white text-end-blue' : 'text-white/70 hover:text-white'}`}>
                 Homme
               </button>
               <button type="button" onClick={() => setActiveGenre('women')}
-                className={`px-3 sm:px-4 h-9 text-xs font-semibold uppercase tracking-wider transition-colors ${activeGenre === 'women' ? 'bg-end-white text-end-black' : 'text-end-white/70 hover:text-end-white'}`}>
+                className={`px-3 sm:px-4 h-9 text-xs font-semibold uppercase tracking-wider transition-colors ${activeGenre === 'women' ? 'bg-white text-end-blue' : 'text-white/70 hover:text-white'}`}>
                 Femme
               </button>
             </div>
-            <p className="text-xs text-end-white/80 hidden sm:block truncate px-4">
+            <p className="text-xs text-white/80 hidden sm:block truncate px-4">
               Livraison gratuite dès 50 000 XOF — Retours sous 28 jours
             </p>
             <div className="hidden sm:block w-16" />
@@ -158,7 +158,7 @@ export const Header: React.FC = () => {
                 <AnimatePresence>
                   {totalItems > 0 && (
                     <motion.span key="badge" initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }}
-                      className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-end-black text-end-white text-2xs font-bold rounded-full flex items-center justify-center leading-none">
+                      className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-end-blue text-white text-2xs font-bold rounded-full flex items-center justify-center leading-none">
                       {totalItems > 9 ? '9+' : totalItems}
                     </motion.span>
                   )}

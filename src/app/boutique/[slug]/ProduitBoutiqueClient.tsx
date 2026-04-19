@@ -246,7 +246,7 @@ export default function ProduitBoutiqueClient({ slug }: { slug: string }) {
               added
                 ? 'bg-green-600 text-white'
                 : selectedTaille && produit.stock > 0
-                ? 'bg-end-black text-end-white hover:bg-end-gray-dark'
+                ? 'bg-end-blue text-white hover:opacity-80'
                 : 'bg-end-gray-light text-end-gray-mid cursor-not-allowed'
             }`}
           >

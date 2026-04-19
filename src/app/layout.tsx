@@ -18,6 +18,7 @@ import { MiniCart } from '@/components/layout/MiniCart'
 import { ToastProvider } from '@/components/ui/Toast'
 import { QueryProvider } from './QueryProvider'
 import { WhatsAppButton } from '@/components/ui/WhatsAppButton'
+import { TopLoader } from '@/components/ui/TopLoader'
 
 /* ============================================================
  * CHARGEMENT DE LA POLICE INTER
@@ -110,6 +111,7 @@ export default function RootLayout({
     <html lang="fr" className={inter.variable}>
       <body className="font-sans antialiased">
         {/* Fournisseur React Query pour les requêtes de données */}
+        <TopLoader />
         <QueryProvider>
           {/* Fournisseur du système de toasts — englobe tout l'arbre */}
           <ToastProvider>
