@@ -43,7 +43,7 @@ export default function HomePage() {
           <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
             <div className="max-w-xl">
               <p className="text-xs font-bold uppercase tracking-widest text-end-white/70 mb-2 sm:mb-3">
-                Nouvelle saison — Collection 2024
+                Nouvelle collection Mars 2026
               </p>
               <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black uppercase leading-none text-end-white mb-4 sm:mb-5">
                 WOG<br />STYLE
