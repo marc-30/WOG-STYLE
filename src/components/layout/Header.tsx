@@ -101,20 +101,14 @@ export const Header: React.FC = () => {
       <div className="bg-end-blue text-white">
         <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-9">
-            <div className="flex items-center gap-0">
-              <button type="button" onClick={() => setActiveGenre('men')}
-                className={`px-3 sm:px-4 h-9 text-xs font-semibold uppercase tracking-wider transition-colors ${activeGenre === 'men' ? 'bg-white text-end-blue' : 'text-white/70 hover:text-white'}`}>
-                Homme
-              </button>
-              <button type="button" onClick={() => setActiveGenre('women')}
-                className={`px-3 sm:px-4 h-9 text-xs font-semibold uppercase tracking-wider transition-colors ${activeGenre === 'women' ? 'bg-white text-end-blue' : 'text-white/70 hover:text-white'}`}>
-                Femme
-              </button>
+            <div className="flex items-center gap-3">
+              <span className="text-xs text-white/90 font-semibold hidden sm:block">📍 Abidjan, Côte d&apos;Ivoire</span>
+              <span className="text-xs text-white/90 font-semibold">+225 07 00 00 00 00</span>
             </div>
-            <p className="text-xs text-white/80 hidden sm:block truncate px-4">
-              Livraison gratuite dès 50 000 XOF — Retours sous 28 jours
+            <p className="text-xs text-white/80 hidden sm:block truncate px-4 text-center">
+              Articles disponibles — Nouvelle collection MARS 2026
             </p>
-            <div className="hidden sm:block w-16" />
+            <div className="hidden sm:block w-40" />
           </div>
         </div>
       </div>
@@ -138,7 +132,9 @@ export const Header: React.FC = () => {
 
             {/* Logo centré */}
             <Link href="/" className="flex-shrink-0" aria-label="WOG-STYLE — Accueil">
-              <WogLogo className={`transition-all duration-250 ${isScrolled ? 'h-8 w-8' : 'h-9 w-9 sm:h-10 sm:w-10'}`} />
+              <span className={`font-black uppercase tracking-tight text-end-black transition-all duration-250 ${isScrolled ? 'text-lg' : 'text-xl sm:text-2xl'}`}>
+                WOG STYLE
+              </span>
             </Link>
 
             {/* Droite : icônes */}
