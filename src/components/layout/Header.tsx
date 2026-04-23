@@ -98,12 +98,17 @@ export const Header: React.FC = () => {
     <header className={`sticky top-0 z-60 bg-end-white transition-shadow duration-250 ${isScrolled ? 'shadow-end-header' : ''}`}>
 
       {/* ── TopBar ── */}
-      <div className="bg-end-black text-end-white">
+      <div className="bg-end-blue text-white">
         <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-center h-9">
-            <p className="text-xs text-end-white/90 font-semibold tracking-wider text-center">
-              Abidjan, Côte d&apos;Ivoire&nbsp;&nbsp;|&nbsp;&nbsp;+225 05 75 39 43 20
+          <div className="flex items-center justify-between h-9">
+            <div className="flex items-center gap-3">
+              <span className="text-xs text-white/90 font-semibold hidden sm:block">📍 Abidjan, Côte d&apos;Ivoire</span>
+              <span className="text-xs text-white/90 font-semibold">+225 07 00 00 00 00</span>
+            </div>
+            <p className="text-xs text-white/80 hidden sm:block truncate px-4 text-center">
+              Articles disponibles — Nouvelle collection MARS 2026
             </p>
+            <div className="hidden sm:block w-40" />
           </div>
         </div>
       </div>
