@@ -29,73 +29,9 @@ export const NAV_ITEMS: NavItem[] = [
     hasMegaMenu: false,
   },
   {
-    label: 'Collection',
-    href: '/boutique',
-    hasMegaMenu: true,
-    megaMenuColumns: [
-      {
-        title: 'GENÈSE',
-        links: [
-          { label: 'Tout GENÈSE', href: '/boutique?collection=genese', highlighted: true },
-          { label: 'Homme', href: '/boutique?collection=genese&genre=HOMME' },
-          { label: 'Femme', href: '/boutique?collection=genese&genre=FEMME' },
-        ],
-      },
-      {
-        title: 'EDEN',
-        links: [
-          { label: 'Tout EDEN', href: '/boutique?collection=eden', highlighted: true },
-          { label: 'Homme', href: '/boutique?collection=eden&genre=HOMME' },
-          { label: 'Femme', href: '/boutique?collection=eden&genre=FEMME' },
-        ],
-      },
-    ],
-    megaMenuImages: [
-      {
-        imageSrc: '/images/genese/emeraude-royale-1.jpg',
-        imageAlt: 'Collection GENÈSE — WOG-STYLE',
-        title: 'GENÈSE',
-        href: '/boutique?collection=genese',
-      },
-    ],
-  },
-  {
     label: 'Ma Boutique',
     href: '/boutique',
-    hasMegaMenu: true,
-    megaMenuColumns: [
-      {
-        title: 'Genre',
-        links: [
-          { label: 'Tous les articles', href: '/boutique', highlighted: true },
-          { label: 'Homme', href: '/boutique?genre=HOMME' },
-          { label: 'Femme', href: '/boutique?genre=FEMME' },
-        ],
-      },
-      {
-        title: 'Collections',
-        links: [
-          { label: 'GENÈSE', href: '/boutique?collection=genese', highlighted: true },
-          { label: 'EDEN', href: '/boutique?collection=eden', highlighted: true },
-          { label: 'Nouveautés', href: '/boutique?statut=NEW' },
-          { label: 'Exclusivités', href: '/boutique?statut=EXCLUSIVE' },
-        ],
-      },
-    ],
-    megaMenuImages: [
-      {
-        imageSrc: '/images/prod-h1-main.jpg',
-        imageAlt: 'Ma Boutique WOG-STYLE',
-        title: 'Nouveautés',
-        href: '/boutique?statut=NEW',
-      },
-      {
-        imageSrc: '/images/prod-f1-main.jpg',
-        imageAlt: 'Collection Femme WOG-STYLE',
-        title: 'Collection Femme',
-        href: '/boutique?genre=FEMME',
-      },
-    ],
+    hasMegaMenu: false,
   },
   {
     label: 'À propos',

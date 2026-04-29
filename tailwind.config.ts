@@ -43,11 +43,11 @@ const config: Config = {
         /* Bleu accent — boutons CTA, badges, barre top */
         'end-blue': '#3641f5',
 
-        /* ── Dashboard admin tokens ── */
-        'brand-25': '#f2f7ff', 'brand-50': '#ecf3ff', 'brand-100': '#dde9ff',
-        'brand-200': '#c2d6ff', 'brand-300': '#9cb9ff', 'brand-400': '#7592ff',
-        'brand-500': '#465fff', 'brand-600': '#3641f5', 'brand-700': '#2a31d8',
-        'brand-800': '#252dae', 'brand-900': '#262e89', 'brand-950': '#161950',
+        /* ── Dashboard admin tokens — thème noir ── */
+        'brand-25': '#f5f5f5', 'brand-50': '#eeeeee', 'brand-100': '#e0e0e0',
+        'brand-200': '#bdbdbd', 'brand-300': '#9e9e9e', 'brand-400': '#757575',
+        'brand-500': '#212121', 'brand-600': '#000000', 'brand-700': '#000000',
+        'brand-800': '#000000', 'brand-900': '#000000', 'brand-950': '#000000',
         'success-50': '#f0fdf4', 'success-100': '#dcfce7', 'success-400': '#4ade80',
         'success-500': '#22c55e', 'success-600': '#16a34a', 'success-700': '#15803d',
         'error-50': '#fef2f2', 'error-100': '#fee2e2', 'error-400': '#f87171',

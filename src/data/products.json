@@ -9,9 +9,9 @@
     "price": 85000,
     "originalPrice": null,
     "currency": "XOF",
-    "images": ["/images/prod-h1-main.jpg", "/images/prod-h1-hover.jpg"],
+    "images": ["/images/prod-h2-main.jpg", "/images/prod-h1-hover.jpg"],
     "mainImage": {
-      "src": "/images/prod-h1-main.jpg",
+      "src": "/images/prod-h2-main.jpg",
       "alt": "WOG Style Collection Noire Homme Vol.1 — vue principale",
       "width": 1440,
       "height": 1920
@@ -23,7 +23,7 @@
       "height": 1920
     },
     "gallery": [
-      { "src": "/images/prod-h1-main.jpg", "alt": "vue principale", "width": 1440, "height": 1920 },
+      { "src": "/images/prod-h2-main.jpg", "alt": "vue principale", "width": 1440, "height": 1920 },
       { "src": "/images/prod-h1-hover.jpg", "alt": "vue alternative", "width": 1440, "height": 1920 }
     ],
     "sizes": [
@@ -191,9 +191,9 @@
     "price": 88000,
     "originalPrice": 108000,
     "currency": "XOF",
-    "images": ["/images/prod-f2-main.jpg", "/images/prod-f2-hover.jpg"],
+    "images": ["/images/prod-f3-main.jpg", "/images/prod-f2-hover.jpg"],
     "mainImage": {
-      "src": "/images/prod-f2-main.jpg",
+      "src": "/images/prod-f3-main.jpg",
       "alt": "WOG Style Collection Femme Vol.2 — vue principale",
       "width": 1440,
       "height": 1920
@@ -205,7 +205,7 @@
       "height": 1920
     },
     "gallery": [
-      { "src": "/images/prod-f2-main.jpg", "alt": "vue principale", "width": 1440, "height": 1920 },
+      { "src": "/images/prod-f3-main.jpg", "alt": "vue principale", "width": 1440, "height": 1920 },
       { "src": "/images/prod-f2-hover.jpg", "alt": "vue alternative", "width": 1440, "height": 1920 }
     ],
     "sizes": [
@@ -281,7 +281,7 @@
     "price": 102000,
     "originalPrice": null,
     "currency": "XOF",
-    "images": ["/images/editorial-1.jpg", "/images/editorial-2.jpg"],
+    "images": ["/images/editorial-1.jpg", "/images/brand-editorial-3.jpg"],
     "mainImage": {
       "src": "/images/editorial-1.jpg",
       "alt": "WOG Style Drop Editorial Unisexe — vue principale",
@@ -289,14 +289,14 @@
       "height": 1920
     },
     "hoverImage": {
-      "src": "/images/editorial-2.jpg",
+      "src": "/images/brand-editorial-3.jpg",
       "alt": "WOG Style Drop Editorial Unisexe — vue alternative",
       "width": 1440,
       "height": 1919
     },
     "gallery": [
       { "src": "/images/editorial-1.jpg", "alt": "vue principale", "width": 1440, "height": 1920 },
-      { "src": "/images/editorial-2.jpg", "alt": "vue alternative", "width": 1440, "height": 1919 }
+      { "src": "/images/brand-editorial-3.jpg", "alt": "vue alternative", "width": 1440, "height": 1919 }
     ],
     "sizes": [
       { "label": "XS", "value": "XS", "inStock": true },
@@ -327,7 +327,7 @@
     "price": 138000,
     "originalPrice": 164000,
     "currency": "XOF",
-    "images": ["/images/brand-editorial-1.jpg", "/images/brand-editorial-2.jpg"],
+    "images": ["/images/brand-editorial-1.jpg", "/images/brand-editorial-3.jpg"],
     "mainImage": {
       "src": "/images/brand-editorial-1.jpg",
       "alt": "WOG Style Collection Marque Édition I — vue principale",
@@ -335,14 +335,14 @@
       "height": 1920
     },
     "hoverImage": {
-      "src": "/images/brand-editorial-2.jpg",
+      "src": "/images/brand-editorial-3.jpg",
       "alt": "WOG Style Collection Marque Édition I — vue alternative",
       "width": 1440,
       "height": 1918
     },
     "gallery": [
       { "src": "/images/brand-editorial-1.jpg", "alt": "vue principale", "width": 1440, "height": 1920 },
-      { "src": "/images/brand-editorial-2.jpg", "alt": "vue alternative", "width": 1440, "height": 1918 },
+      { "src": "/images/brand-editorial-3.jpg", "alt": "vue alternative", "width": 1440, "height": 1918 },
       { "src": "/images/brand-editorial-3.jpg", "alt": "détail", "width": 1440, "height": 1920 }
     ],
     "sizes": [
@@ -374,22 +374,22 @@
     "price": 105000,
     "originalPrice": null,
     "currency": "XOF",
-    "images": ["/images/front-1.jpg", "/images/front-2.jpg"],
+    "images": ["/images/prod-h3-main.jpg", "/images/prod-h2-main.jpg"],
     "mainImage": {
-      "src": "/images/front-1.jpg",
+      "src": "/images/prod-h3-main.jpg",
       "alt": "WOG Style Front Collection Homme Signature — vue principale",
       "width": 1147,
       "height": 860
     },
     "hoverImage": {
-      "src": "/images/front-2.jpg",
+      "src": "/images/prod-h2-main.jpg",
       "alt": "WOG Style Front Collection Homme Signature — vue alternative",
       "width": 1147,
       "height": 860
     },
     "gallery": [
-      { "src": "/images/front-1.jpg", "alt": "vue principale", "width": 1147, "height": 860 },
-      { "src": "/images/front-2.jpg", "alt": "vue alternative", "width": 1147, "height": 860 }
+      { "src": "/images/prod-h3-main.jpg", "alt": "vue principale", "width": 1147, "height": 860 },
+      { "src": "/images/prod-h2-main.jpg", "alt": "vue alternative", "width": 1147, "height": 860 }
     ],
     "sizes": [
       { "label": "S", "value": "S", "inStock": true },
@@ -418,9 +418,9 @@
     "price": 97000,
     "originalPrice": null,
     "currency": "XOF",
-    "images": ["/images/front-3.jpg", "/images/prod-f1-main.jpg"],
+    "images": ["/images/prod-f1-main.jpg", "/images/prod-f1-main.jpg"],
     "mainImage": {
-      "src": "/images/front-3.jpg",
+      "src": "/images/prod-f1-main.jpg",
       "alt": "WOG Style Front Collection Femme Signature — vue principale",
       "width": 1024,
       "height": 1433
@@ -432,7 +432,7 @@
       "height": 1920
     },
     "gallery": [
-      { "src": "/images/front-3.jpg", "alt": "vue principale", "width": 1024, "height": 1433 },
+      { "src": "/images/prod-f1-main.jpg", "alt": "vue principale", "width": 1024, "height": 1433 },
       { "src": "/images/prod-f1-main.jpg", "alt": "détail", "width": 1440, "height": 1920 }
     ],
     "sizes": [
@@ -462,9 +462,9 @@
     "price": 147000,
     "originalPrice": null,
     "currency": "XOF",
-    "images": ["/images/hero-3.jpg", "/images/brand-editorial-3.jpg"],
+    "images": ["/images/hero-1.jpg", "/images/brand-editorial-3.jpg"],
     "mainImage": {
-      "src": "/images/hero-3.jpg",
+      "src": "/images/hero-1.jpg",
       "alt": "WOG Style Padre Drop Pièce Spéciale — vue principale",
       "width": 1440,
       "height": 2048
@@ -476,7 +476,7 @@
       "height": 1920
     },
     "gallery": [
-      { "src": "/images/hero-3.jpg", "alt": "vue principale", "width": 1440, "height": 2048 },
+      { "src": "/images/hero-1.jpg", "alt": "vue principale", "width": 1440, "height": 2048 },
       { "src": "/images/brand-editorial-3.jpg", "alt": "détail", "width": 1440, "height": 1920 }
     ],
     "sizes": [

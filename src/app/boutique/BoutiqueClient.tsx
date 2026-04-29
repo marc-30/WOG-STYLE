@@ -59,30 +59,20 @@ const fmt = (n: number) => n.toLocaleString('fr-FR')
 
 // ── Composant carte produit ───────────────────────────────────────────────────
 function ProductCard({ produit }: { produit: Produit }) {
-  const mainImg = produit.images.find(i => !i.isHover && i.ordre === 0) ?? produit.images[0]
-  const hoverImg = produit.images.find(i => i.isHover) ?? produit.images[1] ?? produit.images[0]
+  const [activeIdx, setActiveIdx] = useState(0)
   const thumbs = produit.images.slice(0, 4)
+  const activeImg = thumbs[activeIdx] ?? thumbs[0]
 
   return (
     <Link href={`/boutique/${produit.slug}`} className="group block">
-      {/* Image principale avec hover */}
+      {/* Grande image — mise à jour au survol des miniatures */}
       <div className="relative aspect-[3/4] overflow-hidden bg-end-gray-light">
-        {/* Image de base */}
-        {mainImg && (
+        {activeImg && (
           /* eslint-disable-next-line @next/next/no-img-element */
           <img
-            src={mainImg.url}
+            src={activeImg.url}
             alt={produit.nom}
-            className="absolute inset-0 w-full h-full object-cover transition-opacity duration-500 group-hover:opacity-0"
-          />
-        )}
-        {/* Image hover (modèle) */}
-        {hoverImg && hoverImg.url !== mainImg?.url && (
-          /* eslint-disable-next-line @next/next/no-img-element */
-          <img
-            src={hoverImg.url}
-            alt={`${produit.nom} — vue alternative`}
-            className="absolute inset-0 w-full h-full object-cover transition-opacity duration-500 opacity-0 group-hover:opacity-100"
+            className="absolute inset-0 w-full h-full object-cover transition-opacity duration-300"
           />
         )}
 
@@ -115,11 +105,19 @@ function ProductCard({ produit }: { produit: Produit }) {
         </div>
       </div>
 
-      {/* Miniatures (angles de vue) */}
+      {/* Miniatures interactives */}
       {thumbs.length > 1 && (
         <div className="flex gap-1 mt-1">
           {thumbs.map((img, i) => (
-            <div key={i} className="w-8 h-10 sm:w-10 sm:h-12 overflow-hidden bg-end-gray-light flex-shrink-0">
+            /* eslint-disable-next-line jsx-a11y/mouse-events-have-key-events */
+            <div
+              key={i}
+              onMouseEnter={(e) => { e.preventDefault(); setActiveIdx(i) }}
+              onClick={(e) => e.preventDefault()}
+              className={`w-8 h-10 sm:w-10 sm:h-12 overflow-hidden flex-shrink-0 border-2 transition-colors cursor-pointer ${
+                activeIdx === i ? 'border-end-black' : 'border-transparent hover:border-end-gray-border'
+              }`}
+            >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={img.url} alt="" className="w-full h-full object-cover" />
             </div>

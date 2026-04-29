@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { useCart } from '@/hooks/useCart'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -29,11 +30,13 @@ const fmt = (n: number) => n.toLocaleString('fr-FR')
 // ── Composant principal ───────────────────────────────────────────────────────
 export default function ProduitBoutiqueClient({ slug }: { slug: string }) {
   const { addItem } = useCart()
+  const router = useRouter()
   const [produit, setProduit] = useState<Produit | null>(null)
   const [loading, setLoading] = useState(true)
   const [activeImg, setActiveImg] = useState(0)
   const [selectedTaille, setSelectedTaille] = useState<string | null>(null)
   const [added, setAdded] = useState(false)
+  const [sizeGuideOpen, setSizeGuideOpen] = useState(false)
 
   useEffect(() => {
     fetch(`/api/produits?slug=${slug}`)
@@ -81,6 +84,12 @@ export default function ProduitBoutiqueClient({ slug }: { slug: string }) {
     setTimeout(() => setAdded(false), 2500)
   }
 
+  const handleBuyNow = () => {
+    if (!produit || !selectedTaille) return
+    handleAddToCart()
+    router.push('/paiement')
+  }
+
   // ── Loading ──
   if (loading) {
     return (
@@ -112,6 +121,9 @@ export default function ProduitBoutiqueClient({ slug }: { slug: string }) {
   const images = produit.images.length > 0 ? produit.images : [{ url: '/images/prod-h1-main.jpg', ordre: 0, isHover: false }]
   const currentImg = images[activeImg] ?? images[0]
 
+  const isHomme = produit.genre === 'HOMME'
+  const isFemme = produit.genre === 'FEMME'
+
   return (
     <main className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* Fil d'Ariane */}
@@ -141,6 +153,7 @@ export default function ProduitBoutiqueClient({ slug }: { slug: string }) {
                 <button
                   key={i}
                   onClick={() => setActiveImg(i)}
+                  onMouseEnter={() => setActiveImg(i)}
                   className={`block w-full aspect-[3/4] overflow-hidden border-2 transition-colors flex-shrink-0 ${
                     activeImg === i ? 'border-end-black' : 'border-transparent hover:border-end-gray-border'
                   }`}
@@ -210,7 +223,7 @@ export default function ProduitBoutiqueClient({ slug }: { slug: string }) {
             <div className="mb-6">
               <div className="flex items-center justify-between mb-3">
                 <p className="text-xs font-bold uppercase tracking-wider text-end-black">Taille</p>
-                <button className="text-xs text-end-gray-dark underline underline-offset-2 hover:text-end-black transition-colors">
+                <button onClick={() => setSizeGuideOpen(true)} className="text-xs text-end-gray-dark underline underline-offset-2 hover:text-end-black transition-colors">
                   Guide des tailles
                 </button>
               </div>
@@ -238,19 +251,32 @@ export default function ProduitBoutiqueClient({ slug }: { slug: string }) {
             </div>
           )}
 
+          {/* Bouton Acheter maintenant */}
+          <button
+            onClick={handleBuyNow}
+            disabled={!selectedTaille || produit.stock === 0}
+            className={`w-full py-4 text-sm font-bold uppercase tracking-wider transition-colors mb-2 ${
+              selectedTaille && produit.stock > 0
+                ? 'bg-end-black text-white hover:opacity-80'
+                : 'bg-end-gray-light text-end-gray-mid cursor-not-allowed'
+            }`}
+          >
+            {produit.stock === 0 ? 'Rupture de stock' : selectedTaille ? 'Acheter maintenant' : 'Choisir une taille'}
+          </button>
+
           {/* Bouton ajout au panier */}
           <button
             onClick={handleAddToCart}
             disabled={!selectedTaille || produit.stock === 0}
-            className={`w-full py-4 text-sm font-bold uppercase tracking-wider transition-colors mb-3 ${
+            className={`w-full py-4 text-sm font-bold uppercase tracking-wider transition-colors border mb-3 ${
               added
-                ? 'bg-green-600 text-white'
+                ? 'bg-green-600 text-white border-green-600'
                 : selectedTaille && produit.stock > 0
-                ? 'bg-end-blue text-white hover:opacity-80'
-                : 'bg-end-gray-light text-end-gray-mid cursor-not-allowed'
+                ? 'bg-white text-end-black border-end-black hover:bg-end-gray-light'
+                : 'bg-end-gray-light text-end-gray-mid border-end-gray-border cursor-not-allowed'
             }`}
           >
-            {added ? '✓ Ajouté au panier' : produit.stock === 0 ? 'Rupture de stock' : selectedTaille ? 'Ajouter au panier' : 'Choisir une taille'}
+            {added ? '✓ Ajouté au panier' : 'Ajouter au panier'}
           </button>
 
           {/* Stock faible */}
@@ -293,6 +319,140 @@ export default function ProduitBoutiqueClient({ slug }: { slug: string }) {
           </div>
         </div>
       </div>
+
+      {/* ── Guide des tailles ── */}
+      {sizeGuideOpen && (
+        <>
+          {/* Overlay */}
+          <div
+            className="fixed inset-0 bg-black/50 z-50"
+            onClick={() => setSizeGuideOpen(false)}
+          />
+          {/* Modale */}
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
+            <div className="bg-white w-full max-w-2xl max-h-[90vh] overflow-y-auto pointer-events-auto shadow-2xl">
+              {/* Header */}
+              <div className="flex items-center justify-between px-6 py-4 border-b border-end-gray-border sticky top-0 bg-white">
+                <h2 className="text-sm font-bold uppercase tracking-widest text-end-black">Guide des tailles</h2>
+                <button onClick={() => setSizeGuideOpen(false)} className="text-end-black hover:opacity-60 transition-opacity p-1">
+                  <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                    <path d="M2 2L16 16M16 2L2 16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                  </svg>
+                </button>
+              </div>
+
+              <div className="px-6 py-6 space-y-8">
+
+                {/* Comment mesurer */}
+                <div>
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-end-black mb-4">Comment prendre vos mesures</h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    {[
+                      { label: 'Tour de poitrine', desc: 'Mesurez à l\'endroit le plus large de la poitrine, bras le long du corps.' },
+                      { label: 'Tour de taille', desc: 'Mesurez à l\'endroit le plus étroit du torse, généralement au-dessus du nombril.' },
+                      { label: 'Tour de hanches', desc: 'Mesurez à l\'endroit le plus large des hanches, pieds joints.' },
+                    ].map(m => (
+                      <div key={m.label} className="bg-end-gray-light p-4">
+                        <p className="text-xs font-bold uppercase tracking-wider text-end-black mb-2">{m.label}</p>
+                        <p className="text-xs text-end-gray-dark leading-relaxed">{m.desc}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Tableau Homme */}
+                {(isHomme || !isFemme) && (
+                  <div>
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-end-black mb-3">
+                      {isFemme ? '' : 'Homme'}
+                    </h3>
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-xs border-collapse">
+                        <thead>
+                          <tr className="bg-end-black text-white">
+                            <th className="text-left px-3 py-2.5 font-semibold uppercase tracking-wider">Taille</th>
+                            <th className="px-3 py-2.5 font-semibold uppercase tracking-wider">XS</th>
+                            <th className="px-3 py-2.5 font-semibold uppercase tracking-wider">S</th>
+                            <th className="px-3 py-2.5 font-semibold uppercase tracking-wider">M</th>
+                            <th className="px-3 py-2.5 font-semibold uppercase tracking-wider">L</th>
+                            <th className="px-3 py-2.5 font-semibold uppercase tracking-wider">XL</th>
+                            <th className="px-3 py-2.5 font-semibold uppercase tracking-wider">XXL</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {[
+                            ['Tour de poitrine (cm)', '82–87', '88–93', '94–99', '100–105', '106–111', '112–117'],
+                            ['Tour de taille (cm)', '68–73', '74–79', '80–85', '86–91', '92–97', '98–103'],
+                            ['Tour de hanches (cm)', '86–91', '92–97', '98–103', '104–109', '110–115', '116–121'],
+                          ].map((row, i) => (
+                            <tr key={i} className={i % 2 === 0 ? 'bg-white' : 'bg-end-gray-light'}>
+                              {row.map((cell, j) => (
+                                <td key={j} className={`px-3 py-2.5 border-b border-end-gray-border ${j === 0 ? 'text-left font-semibold text-end-black' : 'text-center text-end-gray-dark'}`}>
+                                  {cell}
+                                </td>
+                              ))}
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
+
+                {/* Tableau Femme */}
+                {(isFemme || !isHomme) && (
+                  <div>
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-end-black mb-3">
+                      {isHomme ? '' : 'Femme'}
+                    </h3>
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-xs border-collapse">
+                        <thead>
+                          <tr className="bg-end-black text-white">
+                            <th className="text-left px-3 py-2.5 font-semibold uppercase tracking-wider">Taille</th>
+                            <th className="px-3 py-2.5 font-semibold uppercase tracking-wider">XS</th>
+                            <th className="px-3 py-2.5 font-semibold uppercase tracking-wider">S</th>
+                            <th className="px-3 py-2.5 font-semibold uppercase tracking-wider">M</th>
+                            <th className="px-3 py-2.5 font-semibold uppercase tracking-wider">L</th>
+                            <th className="px-3 py-2.5 font-semibold uppercase tracking-wider">XL</th>
+                            <th className="px-3 py-2.5 font-semibold uppercase tracking-wider">XXL</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {[
+                            ['Tour de poitrine (cm)', '76–81', '82–87', '88–93', '94–99', '100–105', '106–111'],
+                            ['Tour de taille (cm)', '60–65', '66–71', '72–77', '78–83', '84–89', '90–95'],
+                            ['Tour de hanches (cm)', '84–89', '90–95', '96–101', '102–107', '108–113', '114–119'],
+                          ].map((row, i) => (
+                            <tr key={i} className={i % 2 === 0 ? 'bg-white' : 'bg-end-gray-light'}>
+                              {row.map((cell, j) => (
+                                <td key={j} className={`px-3 py-2.5 border-b border-end-gray-border ${j === 0 ? 'text-left font-semibold text-end-black' : 'text-center text-end-gray-dark'}`}>
+                                  {cell}
+                                </td>
+                              ))}
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
+
+                {/* Conseil */}
+                <div className="bg-end-gray-light px-4 py-4 border-l-4 border-end-black">
+                  <p className="text-xs font-bold uppercase tracking-wider text-end-black mb-1">Conseil WOG-STYLE</p>
+                  <p className="text-xs text-end-gray-dark leading-relaxed">
+                    En cas de doute entre deux tailles, nous recommandons de choisir la taille supérieure.
+                    Toutes nos pièces sont retournables sous 28 jours.
+                  </p>
+                </div>
+
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+
     </main>
   )
 }

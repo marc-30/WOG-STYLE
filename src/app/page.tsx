@@ -43,7 +43,7 @@ export default function HomePage() {
           <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
             <div className="max-w-xl">
               <p className="text-xs font-bold uppercase tracking-widest text-end-white/70 mb-2 sm:mb-3">
-                Nouvelle saison — Collection 2024
+                Nouvelle Collection Mars 2024
               </p>
               <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black uppercase leading-none text-end-white mb-4 sm:mb-5">
                 WOG<br />STYLE
@@ -53,20 +53,15 @@ export default function HomePage() {
               </p>
               <div className="flex flex-wrap gap-3">
                 <Link
-                  href="/collection"
+                 href="/boutique?collection=genese"
                   className="inline-flex items-center gap-2 bg-end-white text-end-black px-8 py-4 text-xs font-bold uppercase tracking-widest hover:bg-end-gray-light transition-colors"
                 >
-                  Découvrir la collection
+                  Découvrir la Collection GENÈSE
                   <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
                     <path d="M3 7h8M8 4l3 3-3 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 </Link>
-                <Link
-                  href="/collection/genese"
-                  className="inline-flex items-center gap-2 border border-end-white text-end-white px-8 py-4 text-xs font-bold uppercase tracking-widest hover:bg-end-white hover:text-end-black transition-colors"
-                >
-                  Collection GENÈSE
-                </Link>
+               
               </div>
             </div>
           </div>
@@ -84,11 +79,11 @@ export default function HomePage() {
       {/* ============================================================
           DROPS & EXCLUSIVITÉS — BANNIÈRE PLEINE LARGEUR
           ============================================================ */}
-      <section className="relative overflow-hidden border-t border-end-gray-border" style={{ height: '70vh', minHeight: '400px' }}>
+      <section className="relative overflow-hidden border-t border-end-gray-border" style={{ height: '63vh', minHeight: '300px' }}>
         <img
           src="/images/hero-2.jpg"
           alt="WOG-STYLE — Drops & Exclusivités"
-          className="absolute inset-0 w-full h-full object-cover object-center"
+          className="absolute inset-0 w-full h-full object-cover object-top"
         />
         <div className="absolute inset-0 bg-black/45" />
 

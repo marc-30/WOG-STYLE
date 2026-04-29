@@ -234,22 +234,18 @@ CREATE TABLE panier_sessions (
 -- DONNÉES INITIALES — Collections
 -- ============================================================
 INSERT INTO collections (slug, nom, tagline, description, image_cover, genre, statut, ordre) VALUES
-('genese',    'GENÈSE',      'L'origine. Le commencement.', 'Première collection WOG-STYLE. Retour aux sources, aux matières brutes, aux couleurs de la terre et de la forêt.', '/images/genese/emeraude-royale-1.jpg', 'UNISEXE', 'active', 1),
-('homme',     'WOG HOMME',   'L'homme moderne. Affirmé.',  'La ligne masculine WOG-STYLE : vêtements structurés, coupes précises et matières nobles.', '/images/front-1.jpg',  'HOMME',   'active', 2),
-('femme',     'WOG FEMME',   'La femme contemporaine.',    'Silhouettes affirmées, matières sensibles et lignes épurées pour la femme qui incarne son style.', '/images/front-2.jpg',  'FEMME',   'active', 3),
+('genese',    'GENÈSE',      'L''origine. Le commencement.', 'Première collection WOG-STYLE. Retour aux sources, aux matières brutes, aux couleurs de la terre et de la forêt.', '/images/genese/emeraude-royale-1.jpg', 'UNISEXE', 'active', 1),
+('homme',     'WOG HOMME',   'L''homme moderne. Affirmé.',  'La ligne masculine WOG-STYLE : vêtements structurés, coupes précises et matières nobles.', '/images/prod-h3-main.jpg', 'HOMME',   'active', 2),
+('femme',     'WOG FEMME',   'La femme contemporaine.',    'Silhouettes affirmées, matières sensibles et lignes épurées pour la femme qui incarne son style.', '/images/prod-f1-main.jpg', 'FEMME',   'active', 3),
 ('editorial', 'WOG ÉDITORIAL','Drops créatifs & collaborations.', 'Pièces rares issues de collaborations artistiques et de drops éditoriaux limités.', '/images/editorial-1.jpg', 'UNISEXE', 'active', 4);
 
 
 -- ============================================================
--- COMPTES DE TEST — SIMULATION
+-- COMPTES DE TEST — HASHES BCRYPT RÉELS (rounds=10)
 --
--- Hash bcrypt générés pour les mots de passe ci-dessous.
--- Ces hashes correspondent à bcrypt rounds=10.
--- À REMPLACER par de vrais hashes en production.
---
--- ADMIN  : admin@wog-style.com   / AdminWOG2024!
--- CLIENT : client@wog-style.com  / ClientTest123
--- CLIENT : +221770000000         / MobileTest456
+-- ADMIN  : admin@wog-style.com  / AdminWOG2026!
+-- CLIENT : client@wog-style.com / ClientTest123
+-- CLIENT : +221770000000        / MobileTest456
 -- ============================================================
 
 INSERT INTO utilisateurs (prenom, nom, email, telephone, mot_de_passe, role) VALUES
@@ -259,7 +255,7 @@ INSERT INTO utilisateurs (prenom, nom, email, telephone, mot_de_passe, role) VAL
   'WOG',
   'admin@wog-style.com',
   NULL,
-  '$2b$10$rOvHPX3t6sVGmJkL9P2uiO3N7Q8gY4dA1bC5eF0hI2jK6lM.ADMIN',
+  '$2b$10$wKXEHFreQyQMpOlTZuS1Ce3QcQLwJkazmJTijNbsjaYru.dF51TqG',
   'admin'
 ),
 -- Compte client test 1 — email
@@ -268,7 +264,7 @@ INSERT INTO utilisateurs (prenom, nom, email, telephone, mot_de_passe, role) VAL
   'Diallo',
   'client@wog-style.com',
   NULL,
-  '$2b$10$xN3mP7qR2sT6vW9yA1bC4dE8fG0hI5jK.CLIENT.EMAIL.HASH',
+  '$2b$10$l7uNiPAFpglZqO6qtzgkiuHEKrvpZkDy43.DPNjMJCXjYSDbuRxE2',
   'client'
 ),
 -- Compte client test 2 — téléphone
@@ -277,7 +273,7 @@ INSERT INTO utilisateurs (prenom, nom, email, telephone, mot_de_passe, role) VAL
   'Traoré',
   NULL,
   '+221770000000',
-  '$2b$10$zP5nQ8rS3tU7vX1yB2cD6eF9gH0iJ4kL.CLIENT.PHONE.HASH',
+  '$2b$10$aed7SVEt.Mm.EM3AVxJRHORVhgI2jrewy/7jatCvdalsED3tqlSH.',
   'client'
 );
 
