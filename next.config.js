@@ -15,6 +15,8 @@ const nextConfig = {
 
   /* Configuration du composant next/image pour les domaines externes */
   images: {
+    dangerouslyAllowSVG: false,
+    unoptimized: false,
     remotePatterns: [
       {
         /* Domaine placeholder pour les images de développement */

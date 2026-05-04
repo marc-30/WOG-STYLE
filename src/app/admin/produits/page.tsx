@@ -92,7 +92,6 @@ export default function AdminProduitsPage() {
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files ?? [])
     if (!files.length) return
-    // Max 4 images au total
     const remaining = 4 - form.images.length
     if (remaining <= 0) { showMsg('Maximum 4 images par produit.', 'err'); return }
     const toUpload = files.slice(0, remaining)
@@ -103,14 +102,19 @@ export default function AdminProduitsPage() {
         const fd = new FormData()
         fd.append('file', file)
         const res = await fetch('/api/admin/upload', { method: 'POST', body: fd })
-        if (res.ok) {
-          const { url } = await res.json()
-          urls.push(url)
+        const data = await res.json().catch(() => ({}))
+        if (res.ok && data.url) {
+          urls.push(data.url)
+          if (data.warning) showMsg(data.warning, 'ok')
+        } else {
+          showMsg(data.error || `Erreur upload (${res.status})`, 'err')
         }
       }
-      setForm(f => ({ ...f, images: [...f.images, ...urls].slice(0, 4) }))
-    } catch {
-      showMsg("Erreur lors de l'upload.", 'err')
+      if (urls.length > 0) {
+        setForm(f => ({ ...f, images: [...f.images, ...urls].slice(0, 4) }))
+      }
+    } catch (err) {
+      showMsg("Erreur réseau lors de l'upload. Vérifiez votre connexion.", 'err')
     }
     setUploading(false)
     if (fileRef.current) fileRef.current.value = ''
@@ -337,7 +341,8 @@ export default function AdminProduitsPage() {
                 <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 mb-2">
                   {form.images.map((url, i) => (
                     <div key={i} className="relative aspect-square rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700 group">
-                      <Image src={url} alt={`img-${i}`} fill className="object-cover" />
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={url} alt={`img-${i}`} className="w-full h-full object-cover" />
                       {i === 0 && (
                         <span className="absolute bottom-0 left-0 right-0 text-center text-[10px] bg-black/60 text-white py-0.5">Principale</span>
                       )}
