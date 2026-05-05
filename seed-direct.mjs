@@ -123,12 +123,10 @@ const WOG_PRODUCTS = [
   { slug: 'wog-h2-collection-homme-vol2', nom: 'Collection Homme Vol.2', prix: 95000, marque: 'WOG Style', genre: 'HOMME', statut: 'EXCLUSIVE', stock: 18, categorie: 'vetements', description: 'Deuxième volet de la collection homme.', images: ['/images/prod-h2-main.jpg', '/images/prod-h2-hover.jpg'], tailles: ['XS','S','M','L','XL'], col: null },
   { slug: 'wog-h3-lookbook-homme', nom: 'Lookbook Homme — Pièce Phare', prix: 128000, marque: 'WOG Style', genre: 'HOMME', statut: 'NEW', stock: 10, categorie: 'vetements', description: 'La pièce phare du lookbook homme.', images: ['/images/prod-h3-main.jpg', '/images/prod-h3-hover.jpg'], tailles: ['S','M','L','XL'], col: null },
   { slug: 'wog-hom-signature', nom: 'WOG Signature — Homme', prix: 105000, marque: 'WOG Style', genre: 'HOMME', statut: 'STANDARD', stock: 22, categorie: 'vetements', description: 'La silhouette signature homme.', images: ['/images/wog-hom-1.jpg', '/images/prod-h2-hover.jpg'], tailles: ['XS','S','M','L','XL','XXL'], col: 'front-collection' },
-  { slug: 'wog-vest-parf-homme', nom: 'Veste Parfaite — WOG Homme', prix: 147000, marque: 'WOG Style', genre: 'HOMME', statut: 'EXCLUSIVE', stock: 5, categorie: 'vetements', description: 'Pièce spéciale, finitions couture.', images: ['/images/vest-parf-1.jpg', '/images/brand-editorial-3.jpg'], tailles: ['S','M','L','XL'], col: null },
+  { slug: 'wog-vest-parf-homme', nom: 'Veste Parfaite — WOG Homme', prix: 147000, marque: 'WOG Style', genre: 'HOMME', statut: 'EXCLUSIVE', stock: 5, categorie: 'vetements', description: 'Pièce spéciale, finitions couture.', images: ['/images/vest-parf-1.jpg'], tailles: ['S','M','L','XL'], col: null },
   { slug: 'wog-f1-collection-femme-vol1', nom: 'Collection Femme Vol.1', prix: 79000, marque: 'WOG Style', genre: 'FEMME', statut: 'NEW', stock: 20, categorie: 'vetements', description: 'Premier opus de la collection femme WOG.', images: ['/images/prod-f1-main.jpg', '/images/prod-f1-hover.jpg'], tailles: ['XS','S','M','L','XL'], col: null },
   { slug: 'wog-f2-collection-femme-vol2', nom: 'Collection Femme Vol.2', prix: 88000, prixOriginal: 110000, marque: 'WOG Style', genre: 'FEMME', statut: 'SALE', stock: 15, categorie: 'vetements', description: 'Volume II de la collection femme.', images: ['/images/wog-fem-1.jpg', '/images/prod-f2-hover.jpg'], tailles: ['XS','S','M','L'], col: null },
   { slug: 'wog-f3-edition-limitee-femme', nom: 'Édition Limitée Femme', prix: 118000, marque: 'WOG Style', genre: 'FEMME', statut: 'EXCLUSIVE', stock: 8, categorie: 'editions-limitees', description: 'Pièce exclusive, quantité très limitée.', images: ['/images/prod-f3-main.jpg', '/images/prod-f3-hover.jpg'], tailles: ['XS','S','M'], col: null },
-  { slug: 'wog-editorial-1-unisex', nom: 'Drop Editorial — Unisexe', prix: 102000, marque: 'WOG Style', genre: 'UNISEXE', statut: 'NEW', stock: 30, categorie: 'vetements', description: 'Le drop éditorial unisexe WOG.', images: ['/images/editorial-1.jpg', '/images/brand-editorial-1.jpg'], tailles: ['XS','S','M','L','XL','XXL'], col: null },
-  { slug: 'wog-urban-style-unisex', nom: 'Urban Style — Mixte', prix: 65000, prixOriginal: 85000, marque: 'WOG Style', genre: 'UNISEXE', statut: 'SALE', stock: 40, categorie: 'vetements', description: 'Le streetwear WOG accessible à tous.', images: ['/images/styleurb-1.jpg', '/images/unisex-1.jpg'], tailles: ['XS','S','M','L','XL','XXL'], col: null },
 ]
 
 async function main() {
@@ -137,11 +135,15 @@ async function main() {
   // Admin
   console.log('Création du compte admin...')
   const hash = await bcrypt.hash('WogStyle2026!', 12)
-  await prisma.utilisateur.upsert({
+  const adminUser = await prisma.utilisateur.upsert({
     where: { email: 'admin@wog-style.com' },
     update: { motDePasse: hash, role: 'ADMIN', actif: true },
     create: { prenom: 'Admin', nom: 'WOG', email: 'admin@wog-style.com', motDePasse: hash, role: 'ADMIN' },
   })
+  // Supprimer tous les autres utilisateurs
+  await prisma.panierItem.deleteMany({ where: { utilisateurId: { not: adminUser.id } } })
+  const deleted = await prisma.utilisateur.deleteMany({ where: { id: { not: adminUser.id } } })
+  if (deleted.count > 0) console.log(` ✓ ${deleted.count} utilisateur(s) non-admin supprimé(s)`)
   console.log(' ✓ admin@wog-style.com / WogStyle2026!\n')
 
   // Nettoyage si nécessaire

@@ -33,11 +33,11 @@ const nextConfig = {
         pathname: '/**',
       },
       {
-        /* Supabase Storage — uploads produits admin */
+        /* Vercel Blob Storage — uploads produits admin */
         protocol: 'https',
-        hostname: 'kwuduhudvlszqzipgboq.supabase.co',
+        hostname: '*.public.blob.vercel-storage.com',
         port: '',
-        pathname: '/storage/v1/object/public/**',
+        pathname: '/**',
       },
     ],
   },

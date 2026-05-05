@@ -259,7 +259,7 @@ const WOG_PRODUCTS = [
     stock: 5,
     categorie: 'vetements',
     description: 'Pièce spéciale hors collection ordinaire. Confection exclusive, finitions couture.',
-    images: ['/images/vest-parf-1.jpg', '/images/brand-editorial-3.jpg'],
+    images: ['/images/vest-parf-1.jpg'],
     tailles: ['S', 'M', 'L', 'XL'],
     collectionSlug: null as string | null,
   },
@@ -306,35 +306,6 @@ const WOG_PRODUCTS = [
     tailles: ['XS', 'S', 'M'],
     collectionSlug: null as string | null,
   },
-  {
-    slug: 'wog-editorial-1-unisex',
-    nom: 'Drop Editorial — Unisexe',
-    prix: 102000,
-    marque: 'WOG Style',
-    genre: 'UNISEXE' as const,
-    statut: 'NEW' as const,
-    stock: 30,
-    categorie: 'vetements',
-    description: 'Le drop éditorial unisexe WOG. Pour celles et ceux qui refusent les catégories.',
-    images: ['/images/editorial-1.jpg', '/images/brand-editorial-1.jpg'],
-    tailles: ['XS', 'S', 'M', 'L', 'XL', 'XXL'],
-    collectionSlug: null as string | null,
-  },
-  {
-    slug: 'wog-urban-style-unisex',
-    nom: 'Urban Style — Mixte',
-    prix: 65000,
-    prixOriginal: 85000,
-    marque: 'WOG Style',
-    genre: 'UNISEXE' as const,
-    statut: 'SALE' as const,
-    stock: 40,
-    categorie: 'vetements',
-    description: 'Le streetwear WOG accessible à tous. Urban, libre, authentique.',
-    images: ['/images/styleurb-1.jpg', '/images/unisex-1.jpg'],
-    tailles: ['XS', 'S', 'M', 'L', 'XL', 'XXL'],
-    collectionSlug: null as string | null,
-  },
 ]
 
 export async function POST(req: NextRequest) {
@@ -362,9 +333,9 @@ export async function POST(req: NextRequest) {
       await prisma.collection.deleteMany({})
     }
 
-    // ── Upsert admin ──────────────────────────────────────────────────────────
+    // ── Upsert admin + suppression des autres utilisateurs ───────────────────
     const adminHash = await bcrypt.hash('WogStyle2026!', 12)
-    await prisma.utilisateur.upsert({
+    const adminUser = await prisma.utilisateur.upsert({
       where: { email: 'admin@wog-style.com' },
       update: { motDePasse: adminHash, role: 'ADMIN', actif: true },
       create: {
@@ -375,6 +346,9 @@ export async function POST(req: NextRequest) {
         role: 'ADMIN',
       },
     })
+    // Supprimer tous les utilisateurs sauf l'admin principal
+    await prisma.panierItem.deleteMany({ where: { utilisateurId: { not: adminUser.id } } })
+    await prisma.utilisateur.deleteMany({ where: { id: { not: adminUser.id } } })
 
     // ── Collections ───────────────────────────────────────────────────────────
     const collectionMap: Record<string, string> = {}
