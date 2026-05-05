@@ -129,6 +129,7 @@ export default function AdminProduitsPage() {
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!form.nom || !form.prix) { showMsg('Nom et prix obligatoires.', 'err'); return }
+    if (form.images.length === 0) { showMsg('Au moins une image est obligatoire.', 'err'); return }
 
     const slug = form.slug || autoSlug(form.nom)
     setSaving(true)
@@ -170,20 +171,28 @@ export default function AdminProduitsPage() {
     else showMsg('Erreur de suppression.', 'err')
   }
 
-  const handleSeed = async () => {
-    if (!confirm('Initialiser la base avec les 15 produits WOG ? (uniquement si la DB est vide)')) return
+  const handleSeed = async (force = false) => {
+    if (force) {
+      if (!confirm('⚠️ Réinitialisation complète : toutes les commandes et produits existants seront supprimés. Continuer ?')) return
+    } else {
+      if (!confirm('Initialiser la base avec les 18 produits WOG ? (collections EDEN + GENÈSE + Front)')) return
+    }
     setSeeding(true)
     try {
-      const res = await fetch('/api/admin/seed', { method: 'POST' })
+      const res = await fetch('/api/admin/seed', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ force }),
+      })
       const d = await res.json().catch(() => ({}))
       if (res.ok) {
         showMsg(d.message || 'Produits initialisés avec succès.', 'ok')
         fetchProduits()
       } else {
-        showMsg(d.error || d.message || `Erreur ${res.status} — vérifiez que vous êtes bien connecté en tant qu'admin.`, 'err')
+        showMsg(d.error || d.message || `Erreur ${res.status}`, 'err')
       }
-    } catch (err) {
-      showMsg('Erreur réseau. Vérifiez que le serveur tourne.', 'err')
+    } catch {
+      showMsg('Erreur réseau.', 'err')
     }
     setSeeding(false)
   }
@@ -206,10 +215,15 @@ export default function AdminProduitsPage() {
           <p className="mt-1 text-theme-sm text-gray-500 dark:text-gray-400">{produits.length} produit{produits.length !== 1 ? 's' : ''} dans la base de données</p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
-          {produits.length === 0 && (
-            <button onClick={handleSeed} disabled={seeding}
+          {produits.length === 0 ? (
+            <button onClick={() => handleSeed(false)} disabled={seeding}
               className="inline-flex items-center gap-1.5 rounded-lg border border-brand-300 px-3 py-2 text-theme-xs font-medium text-brand-600 hover:bg-brand-50 dark:border-brand-500/30 dark:text-brand-400 dark:hover:bg-brand-500/10 transition-colors disabled:opacity-60">
-              {seeding ? 'Initialisation...' : 'Initialiser les produits WOG'}
+              {seeding ? 'Initialisation...' : '⚡ Initialiser les produits WOG'}
+            </button>
+          ) : (
+            <button onClick={() => handleSeed(true)} disabled={seeding}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-warning-300 px-3 py-2 text-theme-xs font-medium text-warning-600 hover:bg-warning-50 dark:border-warning-500/30 dark:text-warning-400 dark:hover:bg-warning-500/10 transition-colors disabled:opacity-60">
+              {seeding ? 'Réinitialisation...' : '↺ Réinitialiser le catalogue'}
             </button>
           )}
           <button onClick={openCreate}
@@ -336,7 +350,8 @@ export default function AdminProduitsPage() {
               {/* Images — max 4 */}
               <div>
                 <label className="block text-theme-xs font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Images du produit <span className="text-gray-400 font-normal">({form.images.length}/4 max)</span>
+                  Images du produit <span className="text-error-500 font-semibold">*</span>
+                  <span className="text-gray-400 font-normal ml-1">({form.images.length}/4 — 1ère principale, 2ème survol)</span>
                 </label>
                 <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 mb-2">
                   {form.images.map((url, i) => (
@@ -372,7 +387,10 @@ export default function AdminProduitsPage() {
                     <input ref={fileRef} type="file" accept="image/*" multiple className="hidden" onChange={handleUpload} />
                   </label>
                 </div>
-                <p className="text-[11px] text-gray-400">La 1ère image est principale, la 2ème est affichée au survol. JPG, PNG, WebP · max 5 Mo.</p>
+                {form.images.length === 0 && (
+                  <p className="text-[11px] text-error-500 font-medium mt-1">Au moins une image est requise pour créer un produit.</p>
+                )}
+                <p className="text-[11px] text-gray-400 mt-1">JPG, PNG, WebP · max 5 Mo chacune.</p>
               </div>
 
               {/* Nom + Slug */}
@@ -500,7 +518,7 @@ export default function AdminProduitsPage() {
 
               {/* Actions */}
               <div className="flex gap-3 pt-2 border-t border-gray-100 dark:border-gray-800">
-                <button type="submit" disabled={saving}
+                <button type="submit" disabled={saving || form.images.length === 0}
                   className="flex-1 rounded-lg bg-brand-500 py-2.5 text-sm font-semibold text-white hover:bg-brand-600 disabled:opacity-60 transition-colors">
                   {saving ? 'Enregistrement...' : modal.mode === 'create' ? 'Créer le produit' : 'Enregistrer les modifications'}
                 </button>

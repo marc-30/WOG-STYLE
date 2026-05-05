@@ -47,6 +47,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Nom, slug et prix requis.' }, { status: 400 })
     }
 
+    if (!images || !Array.isArray(images) || images.length === 0) {
+      return NextResponse.json({ error: 'Au moins une image est obligatoire.' }, { status: 400 })
+    }
+
     // Vérifier unicité du slug
     const existing = await prisma.produit.findUnique({ where: { slug } })
     if (existing) return NextResponse.json({ error: 'Ce slug existe déjà.' }, { status: 409 })
