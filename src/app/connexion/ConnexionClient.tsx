@@ -43,51 +43,72 @@ export const ConnexionClient: React.FC = () => {
     }
 
     setLoading(true)
-    await new Promise((r) => setTimeout(r, 900))
-    setLoading(false)
+    setError('')
 
-    if (tab === 'connexion') {
-      /* 1. Essayer d'abord la vraie API */
-      const res = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ identifiant, motDePasse }),
-      })
+    try {
+      if (tab === 'connexion') {
+        let connected = false
 
-      if (res.ok) {
-        const data = await res.json()
-        saveAuthUser({ id: data.user.id, prenom: data.user.prenom, nom: data.user.nom, role: data.user.role.toLowerCase() as 'admin' | 'client' })
-        router.push(data.user.role === 'ADMIN' ? '/admin' : '/profil')
-        return
-      }
+        /* 1. Vraie API */
+        try {
+          const res = await fetch('/api/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ identifiant, motDePasse }),
+          })
 
-      /* 2. Fallback comptes de test (dev uniquement) */
-      const compte = simulerConnexion(identifiant, motDePasse)
-      if (!compte) {
+          if (res.ok) {
+            const data = await res.json()
+            saveAuthUser({ id: data.user.id, prenom: data.user.prenom, nom: data.user.nom, role: data.user.role.toLowerCase() as 'admin' | 'client' })
+            router.push(data.user.role === 'ADMIN' ? '/admin' : '/profil')
+            return
+          }
+
+          /* 2. Fallback comptes de test (dev local) */
+          const compte = simulerConnexion(identifiant, motDePasse)
+          if (compte) {
+            saveAuthUser({ id: compte.id, prenom: compte.prenom, nom: compte.nom, role: compte.role })
+            router.push(compte.role === 'admin' ? '/admin' : '/profil')
+            connected = true
+            return
+          }
+
+          const errData = await res.json().catch(() => ({}))
+          setError(errData.error ?? 'Identifiant ou mot de passe incorrect.')
+        } catch {
+          /* 3. Fallback si API indisponible */
+          const compte = simulerConnexion(identifiant, motDePasse)
+          if (compte) {
+            saveAuthUser({ id: compte.id, prenom: compte.prenom, nom: compte.nom, role: compte.role })
+            router.push(compte.role === 'admin' ? '/admin' : '/profil')
+            connected = true
+            return
+          }
+          setError('Connexion impossible. Vérifiez votre réseau.')
+        }
+
+        if (!connected) return
+
+      } else {
+        /* Inscription */
+        const res = await fetch('/api/auth/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ prenom, nom, email: identifiantType === 'email' ? identifiant : undefined, telephone: identifiantType === 'telephone' ? identifiant : undefined, motDePasse }),
+        })
+
+        if (res.ok) {
+          const data = await res.json()
+          saveAuthUser({ id: data.user.id, prenom: data.user.prenom, nom: data.user.nom, role: 'client' })
+          router.push('/profil')
+          return
+        }
+
         const errData = await res.json().catch(() => ({}))
-        setError(errData.error ?? 'Identifiant ou mot de passe incorrect.')
-        return
+        setError(errData.error ?? 'Erreur lors de la création du compte.')
       }
-      saveAuthUser({ id: compte.id, prenom: compte.prenom, nom: compte.nom, role: compte.role })
-      router.push(compte.role === 'admin' ? '/admin' : '/profil')
-
-    } else {
-      /* Inscription via la vraie API */
-      const res = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prenom, nom, email: identifiantType === 'email' ? identifiant : undefined, telephone: identifiantType === 'telephone' ? identifiant : undefined, motDePasse }),
-      })
-
-      if (res.ok) {
-        const data = await res.json()
-        saveAuthUser({ id: data.user.id, prenom: data.user.prenom, nom: data.user.nom, role: 'client' })
-        router.push('/profil')
-        return
-      }
-
-      const errData = await res.json().catch(() => ({}))
-      setError(errData.error ?? 'Erreur lors de la création du compte.')
+    } finally {
+      setLoading(false)
     }
   }
 

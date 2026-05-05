@@ -35,7 +35,7 @@ export const TEST_ACCOUNTS: TestAccount[] = [
     prenom: 'Admin',
     nom: 'WOG',
     email: 'admin@wog-style.com',
-    motDePasse: 'AdminWOG2024!',
+    motDePasse: 'WogStyle2026!',
     role: 'admin',
   },
   {

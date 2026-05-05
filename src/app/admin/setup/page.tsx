@@ -8,7 +8,7 @@ import { useRouter } from 'next/navigation'
 
 export default function AdminSetupPage() {
   const router = useRouter()
-  const [form, setForm] = useState({ prenom: '', nom: '', email: '', telephone: '', motDePasse: '', setupKey: '' })
+  const [form, setForm] = useState({ prenom: 'Admin', nom: 'WOG', email: 'admin@wog-style.com', telephone: '', motDePasse: 'WogStyle2026!', setupKey: 'wog-admin-setup-2026' })
   const [loading, setLoading] = useState(false)
   const [msg, setMsg] = useState('')
   const [ok, setOk] = useState(false)
