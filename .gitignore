@@ -36,3 +36,9 @@ desktop.ini
 next-env.d.ts
 
 /src/generated/prisma
+
+# Dossier de travail local (copie — le projet racine est la source)
+wog-style/
+WOG-IMAGE/
+backend-wog/
+.claude/
