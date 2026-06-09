@@ -141,17 +141,17 @@ export const PaiementClient: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-end-gray-light">
-      <div className="max-w-screen-lg mx-auto px-4 py-10">
-        <nav className="flex items-center gap-2 text-xs text-end-gray-mid mb-8">
+      <div className="max-w-screen-lg mx-auto px-4 py-6 sm:py-10">
+        <nav className="flex items-center gap-2 text-xs text-end-gray-mid mb-6">
           <Link href="/" className="hover:text-end-black transition-colors">Accueil</Link>
           <span>/</span><span>Panier</span><span>/</span>
           <span className="font-bold text-end-black">Paiement</span>
         </nav>
 
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-5 lg:gap-8">
           {/* Colonne formulaire */}
-          <div className="lg:col-span-3">
-            <div className="bg-end-white p-6 sm:p-8">
+          <div className="lg:col-span-3 order-2 lg:order-1">
+            <div className="bg-end-white p-4 sm:p-8">
 
               {/* Infos client */}
               <div className="mb-8">
@@ -179,7 +179,7 @@ export const PaiementClient: React.FC = () => {
               <h1 className="text-xl font-black uppercase tracking-tight text-end-black mb-6">Méthode de paiement</h1>
 
               {/* Sélecteur méthode */}
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-8">
+              <div className="flex flex-col sm:grid sm:grid-cols-3 gap-2 mb-8">
                 {([
                   { id: 'carte', label: 'Carte bancaire', sublabel: 'Visa · Mastercard' },
                   { id: 'wave', label: 'Wave', sublabel: 'Instantané' },
@@ -188,7 +188,7 @@ export const PaiementClient: React.FC = () => {
                   { id: 'paypal', label: 'PayPal', sublabel: 'International' },
                 ] as { id: MethodePaiement; label: string; sublabel: string }[]).map(m => (
                   <button key={m.id} type="button" onClick={() => setMethode(m.id)}
-                    className={`flex flex-col items-center gap-2 p-3 border-2 text-xs transition-all ${methode === m.id ? 'border-end-blue bg-blue-50' : 'border-end-gray-border hover:border-end-gray-mid'}`}>
+                    className={`flex items-center justify-between sm:flex-col sm:items-center sm:justify-center gap-2 px-4 py-3 sm:p-3 border-2 text-xs transition-all ${methode === m.id ? 'border-end-blue bg-blue-50' : 'border-end-gray-border hover:border-end-gray-mid'}`}>
                     <span className="font-semibold text-end-black">{m.label}</span>
                     <span className="text-[10px] text-end-gray-mid">{m.sublabel}</span>
                   </button>
@@ -265,9 +265,9 @@ export const PaiementClient: React.FC = () => {
             </div>
           </div>
 
-          {/* Récapitulatif */}
-          <div className="lg:col-span-2">
-            <div className="bg-end-white p-6">
+          {/* Récapitulatif — affiché EN PREMIER sur mobile */}
+          <div className="lg:col-span-2 order-1 lg:order-2">
+            <div className="bg-end-white p-4 sm:p-6">
               <h2 className="text-sm font-black uppercase tracking-wider text-end-black mb-6">Récapitulatif</h2>
 
               {items.length > 0 ? (

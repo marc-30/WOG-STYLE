@@ -76,11 +76,11 @@ export const ProfilClient: React.FC = () => {
           <span className="text-end-black font-semibold">Mon profil</span>
         </nav>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
 
           {/* ── Carte identité ── */}
           <div className="lg:col-span-1">
-            <div className="bg-end-white p-6 text-center">
+            <div className="bg-end-white p-5 sm:p-6 text-center">
 
               {/* Avatar initiales */}
               <div className="w-20 h-20 rounded-full bg-end-black text-end-white text-2xl font-black flex items-center justify-center mx-auto mb-4">
@@ -148,16 +148,16 @@ export const ProfilClient: React.FC = () => {
           <div className="lg:col-span-2 space-y-6">
 
             {/* Stats rapides */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+            <div className="grid grid-cols-3 gap-3">
               {[
                 { label: 'Commandes', value: user._count.commandes, icon: '📦' },
                 { label: 'Points fidélité', value: user._count.commandes * 100, icon: '⭐' },
                 { label: 'Statut', value: user._count.commandes >= 5 ? 'Gold' : 'Standard', icon: '🏅' },
               ].map((stat) => (
-                <div key={stat.label} className="bg-end-white p-4 text-center">
-                  <p className="text-2xl mb-1">{stat.icon}</p>
-                  <p className="text-lg font-black text-end-black">{stat.value}</p>
-                  <p className="text-xs text-end-gray-mid uppercase tracking-wider">{stat.label}</p>
+                <div key={stat.label} className="bg-end-white p-3 sm:p-4 text-center">
+                  <p className="text-xl sm:text-2xl mb-1">{stat.icon}</p>
+                  <p className="text-base sm:text-lg font-black text-end-black">{stat.value}</p>
+                  <p className="text-[10px] sm:text-xs text-end-gray-mid uppercase tracking-wider">{stat.label}</p>
                 </div>
               ))}
             </div>
@@ -187,7 +187,7 @@ export const ProfilClient: React.FC = () => {
               <h2 className="text-sm font-black uppercase tracking-wider text-end-black mb-4">
                 Liens rapides
               </h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 gap-2 sm:gap-3">
                 {[
                   { href: '/collection', label: 'Explorer les collections' },
                   { href: '/paiement', label: 'Passer une commande' },

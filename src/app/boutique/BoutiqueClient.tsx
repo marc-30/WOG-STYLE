@@ -400,6 +400,16 @@ export default function BoutiqueClient() {
       )}
 
       <div className="flex gap-8 items-start">
+        {/* ── Sidebar filtres (desktop) ── */}
+        <aside className="hidden lg:block w-56 flex-shrink-0 sticky top-28">
+          <FilterPanel
+            filters={filters}
+            onChange={handleFilter}
+            collections={collections}
+            total={filtered.length}
+          />
+        </aside>
+
         {/* ── Grille produits ── */}
         <div className="flex-1 min-w-0">
           {loading ? (
@@ -433,15 +443,6 @@ export default function BoutiqueClient() {
           )}
         </div>
 
-        {/* ── Sidebar filtres (desktop) ── */}
-        <aside className="hidden lg:block w-56 flex-shrink-0 sticky top-28">
-          <FilterPanel
-            filters={filters}
-            onChange={handleFilter}
-            collections={collections}
-            total={filtered.length}
-          />
-        </aside>
       </div>
 
       {/* ── Drawer filtres mobile ── */}
@@ -451,7 +452,7 @@ export default function BoutiqueClient() {
             className="fixed inset-0 bg-black/50 z-50 lg:hidden"
             onClick={() => setFilterOpen(false)}
           />
-          <div className="fixed right-0 top-0 h-full w-80 max-w-[90vw] bg-white z-50 flex flex-col shadow-2xl lg:hidden">
+          <div className="fixed left-0 top-0 h-full w-80 max-w-[90vw] bg-white z-50 flex flex-col shadow-2xl lg:hidden">
             <div className="flex items-center justify-between p-5 border-b border-end-gray-border">
               <h2 className="font-bold text-sm uppercase tracking-widest text-end-black">Filtres</h2>
               <button onClick={() => setFilterOpen(false)} className="text-end-black hover:opacity-60 transition-opacity">

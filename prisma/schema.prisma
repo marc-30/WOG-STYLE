@@ -1,11 +1,11 @@
-// WOG-STYLE — Schéma Prisma (PostgreSQL / Supabase)
+// WOG-STYLE — Schéma Prisma (MySQL)
 
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "mysql"
   url      = env("DATABASE_URL")
 }
 
