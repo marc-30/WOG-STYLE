@@ -1,10 +1,8 @@
-/**
- * GET  /api/admin/taches — Liste toutes les tâches (ADMIN only)
- * POST /api/admin/taches — Crée une tâche
- */
 import { NextRequest, NextResponse } from 'next/server'
+import { RowDataPacket } from 'mysql2'
 import { verifyToken, SESSION_COOKIE } from '@/lib/jwt'
-import { prisma } from '@/lib/prisma'
+import pool from '@/lib/db'
+import { randomUUID } from 'crypto'
 
 async function requireAdmin(req: NextRequest) {
   const token = req.cookies.get(SESSION_COOKIE)?.value
@@ -17,12 +15,11 @@ async function requireAdmin(req: NextRequest) {
 export async function GET(req: NextRequest) {
   const admin = await requireAdmin(req)
   if (!admin) return NextResponse.json({ error: 'Non autorisé.' }, { status: 401 })
-
   try {
-    const taches = await prisma.tache.findMany({
-      orderBy: [{ statut: 'asc' }, { priorite: 'asc' }, { createdAt: 'desc' }],
-    })
-    return NextResponse.json({ taches })
+    const [rows] = await pool.execute<RowDataPacket[]>(
+      "SELECT * FROM taches ORDER BY FIELD(statut,'A_FAIRE','EN_COURS','TERMINE'), FIELD(priorite,'HAUTE','MOYENNE','BASSE'), createdAt DESC"
+    )
+    return NextResponse.json({ taches: rows })
   } catch (error) {
     console.error('[GET /api/admin/taches]', error)
     return NextResponse.json({ error: 'Erreur serveur.' }, { status: 500 })
@@ -32,22 +29,16 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   const admin = await requireAdmin(req)
   if (!admin) return NextResponse.json({ error: 'Non autorisé.' }, { status: 401 })
-
   try {
     const { titre, description, priorite, statut, echeance, assignee } = await req.json()
     if (!titre) return NextResponse.json({ error: 'Titre requis.' }, { status: 400 })
-
-    const tache = await prisma.tache.create({
-      data: {
-        titre: titre.trim(),
-        description: description?.trim() || null,
-        priorite: priorite ?? 'MOYENNE',
-        statut: statut ?? 'A_FAIRE',
-        echeance: echeance ? new Date(echeance) : null,
-        assignee: assignee?.trim() || null,
-      },
-    })
-    return NextResponse.json({ tache }, { status: 201 })
+    const id = randomUUID()
+    await pool.execute(
+      'INSERT INTO taches (id, titre, description, priorite, statut, echeance, assignee) VALUES (?, ?, ?, ?, ?, ?, ?)',
+      [id, titre.trim(), description?.trim() || null, priorite ?? 'MOYENNE', statut ?? 'A_FAIRE', echeance ? new Date(echeance) : null, assignee?.trim() || null]
+    )
+    const [rows] = await pool.execute<RowDataPacket[]>('SELECT * FROM taches WHERE id = ?', [id])
+    return NextResponse.json({ tache: rows[0] }, { status: 201 })
   } catch (error) {
     console.error('[POST /api/admin/taches]', error)
     return NextResponse.json({ error: 'Erreur serveur.' }, { status: 500 })

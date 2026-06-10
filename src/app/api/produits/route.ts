@@ -1,9 +1,6 @@
-/**
- * GET /api/produits — Produits publics pour la boutique (lecture seule)
- * Lit depuis la DB avec images, tailles et collection.
- */
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { RowDataPacket } from 'mysql2'
+import pool from '@/lib/db'
 
 export const dynamic = 'force-dynamic'
 
@@ -16,24 +13,40 @@ export async function GET(req: NextRequest) {
   const collectionSlug = searchParams.get('collection')
 
   try {
-    const where: Record<string, unknown> = { actif: true }
-    if (genre) where.genre = genre.toUpperCase()
-    if (statut) where.statut = statut.toUpperCase()
-    if (slug) where.slug = slug
-    if (categorie) where.categorie = categorie
-    if (collectionSlug) where.collection = { slug: collectionSlug }
+    const conditions: string[] = ['p.actif=1']
+    const vals: (string | null)[] = []
 
-    const produits = await prisma.produit.findMany({
-      where,
-      orderBy: { createdAt: 'desc' },
-      include: {
-        images: { orderBy: { ordre: 'asc' } },
-        tailles: { orderBy: { label: 'asc' } },
-        collection: { select: { id: true, slug: true, nom: true } },
-      },
-    })
+    if (genre) { conditions.push('p.genre=?'); vals.push(genre.toUpperCase()) }
+    if (statut) { conditions.push('p.statut=?'); vals.push(statut.toUpperCase()) }
+    if (slug) { conditions.push('p.slug=?'); vals.push(slug) }
+    if (categorie) { conditions.push('p.categorie=?'); vals.push(categorie) }
+    if (collectionSlug) { conditions.push('c.slug=?'); vals.push(collectionSlug) }
 
-    return NextResponse.json({ produits, total: produits.length })
+    const [produits] = await pool.execute<RowDataPacket[]>(
+      `SELECT p.*, c.id AS cId, c.slug AS cSlug, c.nom AS cNom
+       FROM produits p
+       LEFT JOIN collections c ON c.id = p.collectionId
+       WHERE ${conditions.join(' AND ')}
+       ORDER BY p.createdAt DESC`,
+      vals
+    )
+
+    if (produits.length === 0) return NextResponse.json({ produits: [], total: 0 })
+
+    const ids = produits.map(p => p.id)
+    const ph = ids.map(() => '?').join(',')
+    const [images] = await pool.execute<RowDataPacket[]>(`SELECT * FROM produit_images WHERE produitId IN (${ph}) ORDER BY ordre ASC`, ids)
+    const [tailles] = await pool.execute<RowDataPacket[]>(`SELECT * FROM produit_tailles WHERE produitId IN (${ph}) ORDER BY label ASC`, ids)
+
+    const result = produits.map(p => ({
+      ...p,
+      actif: Boolean(p.actif),
+      images: images.filter(i => i.produitId === p.id),
+      tailles: tailles.filter(t => t.produitId === p.id),
+      collection: p.collectionId ? { id: p.cId, slug: p.cSlug, nom: p.cNom } : null,
+    }))
+
+    return NextResponse.json({ produits: result, total: result.length })
   } catch (error) {
     console.error('[GET /api/produits]', error)
     return NextResponse.json({ produits: [], total: 0, error: 'DB indisponible' })

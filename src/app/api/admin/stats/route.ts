@@ -1,9 +1,7 @@
-/**
- * GET /api/admin/stats — KPIs réels pour le tableau de bord admin
- */
 import { NextRequest, NextResponse } from 'next/server'
+import { RowDataPacket } from 'mysql2'
 import { verifyToken, SESSION_COOKIE } from '@/lib/jwt'
-import { prisma } from '@/lib/prisma'
+import pool from '@/lib/db'
 
 async function requireAdmin(req: NextRequest) {
   const token = req.cookies.get(SESSION_COOKIE)?.value
@@ -23,56 +21,35 @@ export async function GET(req: NextRequest) {
     const debut60j = new Date(now.getTime() - 60 * 24 * 60 * 60 * 1000)
 
     const [
-      totalCommandes,
-      commandesMois,
-      commandesMoisPrec,
-      chiffreAffaires,
-      caMoisPrec,
-      clientsActifs,
-      clientsMoisPrec,
-      totalProduits,
+      [r1], [r2], [r3], [r4], [r5], [r6], [r7], [r8], [r9]
     ] = await Promise.all([
-      prisma.commande.count(),
-      prisma.commande.count({ where: { createdAt: { gte: debut30j } } }),
-      prisma.commande.count({ where: { createdAt: { gte: debut60j, lt: debut30j } } }),
-      prisma.commande.aggregate({
-        _sum: { montantTotal: true },
-        where: { statut: { not: 'ANNULE' } },
-      }),
-      prisma.commande.aggregate({
-        _sum: { montantTotal: true },
-        where: { statut: { not: 'ANNULE' }, createdAt: { gte: debut60j, lt: debut30j } },
-      }),
-      prisma.utilisateur.count({ where: { actif: true, role: 'CLIENT' } }),
-      prisma.utilisateur.count({ where: { actif: true, role: 'CLIENT', createdAt: { gte: debut60j, lt: debut30j } } }),
-      prisma.produit.count({ where: { actif: true } }),
+      pool.execute<RowDataPacket[]>('SELECT COUNT(*) AS cnt FROM commandes'),
+      pool.execute<RowDataPacket[]>('SELECT COUNT(*) AS cnt FROM commandes WHERE createdAt >= ?', [debut30j]),
+      pool.execute<RowDataPacket[]>('SELECT COUNT(*) AS cnt FROM commandes WHERE createdAt >= ? AND createdAt < ?', [debut60j, debut30j]),
+      pool.execute<RowDataPacket[]>("SELECT COALESCE(SUM(montantTotal),0) AS total FROM commandes WHERE statut != 'ANNULE'"),
+      pool.execute<RowDataPacket[]>("SELECT COALESCE(SUM(montantTotal),0) AS total FROM commandes WHERE statut != 'ANNULE' AND createdAt >= ? AND createdAt < ?", [debut60j, debut30j]),
+      pool.execute<RowDataPacket[]>("SELECT COUNT(*) AS cnt FROM utilisateurs WHERE actif=1 AND role='CLIENT'"),
+      pool.execute<RowDataPacket[]>("SELECT COUNT(*) AS cnt FROM utilisateurs WHERE actif=1 AND role='CLIENT' AND createdAt >= ? AND createdAt < ?", [debut60j, debut30j]),
+      pool.execute<RowDataPacket[]>('SELECT COUNT(*) AS cnt FROM produits WHERE actif=1'),
+      pool.execute<RowDataPacket[]>("SELECT COUNT(*) AS cnt FROM commandes WHERE statut='PAYE'"),
     ])
 
-    const ca = chiffreAffaires._sum.montantTotal ?? 0
-    const caPrev = caMoisPrec._sum.montantTotal ?? 0
+    const tc = Number(r1[0].cnt), cm = Number(r2[0].cnt), cmp = Number(r3[0].cnt)
+    const ca = Number(r4[0].total), caPrev = Number(r5[0].total)
+    const clients = Number(r6[0].cnt), clientsPrev = Number(r7[0].cnt)
+    const produits = Number(r8[0].cnt), paye = Number(r9[0].cnt)
 
-    const pctCommandes = commandesMoisPrec > 0
-      ? (((commandesMois - commandesMoisPrec) / commandesMoisPrec) * 100).toFixed(1)
-      : commandesMois > 0 ? '+100' : '0'
-
-    const pctCA = caPrev > 0
-      ? (((ca - caPrev) / caPrev) * 100).toFixed(1)
-      : ca > 0 ? '+100' : '0'
-
-    const pctClients = clientsMoisPrec > 0
-      ? (((clientsActifs - clientsMoisPrec) / clientsMoisPrec) * 100).toFixed(1)
-      : clientsActifs > 0 ? '+100' : '0'
-
-    // Taux de conversion : commandes payées / total visites (on approxime avec commandes/clients)
-    const commandesPaye = await prisma.commande.count({ where: { statut: 'PAYE' } })
-    const tauxConversion = clientsActifs > 0 ? ((commandesPaye / clientsActifs) * 100).toFixed(1) : '0'
+    const pctCommandes = cmp > 0 ? (((cm - cmp) / cmp) * 100).toFixed(1) : cm > 0 ? '+100' : '0'
+    const pctCA = caPrev > 0 ? (((ca - caPrev) / caPrev) * 100).toFixed(1) : ca > 0 ? '+100' : '0'
+    const pctClients = clientsPrev > 0 ? (((clients - clientsPrev) / clientsPrev) * 100).toFixed(1) : clients > 0 ? '+100' : '0'
+    const tauxConversion = clients > 0 ? ((paye / clients) * 100).toFixed(1) : '0'
 
     return NextResponse.json({
       ca: { valeur: ca, pct: pctCA },
-      commandes: { valeur: totalCommandes, mois: commandesMois, pct: pctCommandes },
-      clients: { valeur: clientsActifs, pct: pctClients },
+      commandes: { valeur: tc, mois: cm, pct: pctCommandes },
+      clients: { valeur: clients, pct: pctClients },
       conversion: { valeur: parseFloat(tauxConversion) },
-      produits: { valeur: totalProduits },
+      produits: { valeur: produits },
     })
   } catch (error) {
     console.error('[GET /api/admin/stats]', error)

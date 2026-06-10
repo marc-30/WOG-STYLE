@@ -1,69 +1,127 @@
-﻿# WOG-STYLE --- Plateforme E-Commerce Mode
+# WOG-STYLE — E-commerce Next.js 14
 
-Application e-commerce WOG-STYLE pour le marche africain (XOF, Wave / Orange Money / MTN / PayPal / Carte).
+Boutique e-commerce mode haut de gamme pour la marque WOG-STYLE.
+Collections africaines contemporaines, tableau de bord admin complet, paiement Stripe.
 
 ---
 
 ## Stack technique
 
-| Technologie | Role |
+| Technologie | Rôle |
 |---|---|
-| Next.js 14 | Framework React App Router |
-| Prisma 5 + PostgreSQL | ORM + base de donnees Supabase |
+| Next.js 14 (App Router) | Framework full-stack |
+| MySQL 8.0 + mysql2 | Base de données (SQL pur, sans ORM) |
 | TypeScript | Typage statique |
 | Tailwind CSS | Styles |
-| ApexCharts | Graphiques analytics |
-| bcryptjs + jsonwebtoken | Auth JWT |
-| Zustand | Panier persiste |
 | Framer Motion | Animations |
+| Headless UI | Composants accessibles |
+| bcryptjs + jsonwebtoken | Authentification JWT |
+| Zustand | Panier persisté (state global) |
+| TanStack Query | Fetching / cache côté client |
+| ApexCharts | Graphiques analytics |
+| Stripe | Paiement par carte |
+
+---
+
+## Prérequis
+
+- Node.js 18+
+- MySQL 8.0+ (service local)
+- npm
 
 ---
 
 ## Installation
 
 ```bash
-cd WOG/wog-style
+# 1. Installer les dépendances
 npm install
-npx prisma db push
-npx prisma generate
+
+# 2. Configurer les variables d'environnement
+cp .env.example .env.local
+# Éditer .env.local avec vos identifiants MySQL
+
+# 3. Créer le schéma en base
+mysql -u root -p < schema.sql
+
+# 4. Lancer le serveur
 npm run dev
 ```
 
 ---
 
-## Variables d environnement (.env)
+## Variables d'environnement
+
+Fichier `.env.local` :
 
 ```env
-# OBLIGATOIRES
-DATABASE_URL=postgresql://postgres:MOT_DE_PASSE@db.ID.supabase.co:5432/postgres
-ADMIN_SETUP_KEY=wog-admin-setup-2026
+DB_HOST=localhost
+DB_USER=root
+DB_PASSWORD=votre_mot_de_passe
+DB_NAME=wog_database
+DB_PORT=3306
 
-# OPTIONNELLES - Supabase Storage (upload images production)
-# NEXT_PUBLIC_SUPABASE_URL=https://ID.supabase.co
-# SUPABASE_SERVICE_ROLE_KEY=votre-service-role-key
+JWT_SECRET="votre-secret-jwt"
+ADMIN_SETUP_KEY="wog-admin-setup-2026"
 
-# OPTIONNELLES - Liens marchands paiement
-# NEXT_PUBLIC_WAVE_MERCHANT_URL=https://pay.wave.com/m/VOTRE_ID
-# NEXT_PUBLIC_ORANGE_MERCHANT_URL=https://merchant.orange-money.com/VOTRE_ID
-# NEXT_PUBLIC_PAYPAL_MERCHANT_URL=https://www.paypal.me/VOTRE_COMPTE
+# Stripe (optionnel — paiement carte désactivé si absent)
+# STRIPE_SECRET_KEY=sk_test_...
+# NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_...
 ```
 
 ---
 
-## Premiere connexion admin
+## Compte admin & catalogue
 
-1. Creez un compte normal sur /connexion
-2. Allez sur /admin/setup
-3. Entrez email/telephone, mot de passe et ADMIN_SETUP_KEY
-4. Votre compte est promu ADMIN
+Après avoir créé le schéma :
+
+1. Connectez-vous sur `/connexion` avec votre compte
+2. Appelez `POST /api/admin/seed` (ou via le bouton dans `/admin/produits`)
+
+Compte admin par défaut après seed :
+
+| Champ | Valeur |
+|---|---|
+| Email | admin@wog-style.com |
+| Mot de passe | WogStyle2026! |
 
 ---
 
-## Initialiser le catalogue
+## Scripts
 
-1. Allez sur /admin/produits
-2. Cliquez Initialiser les produits WOG (visible si catalogue vide)
-3. Les 12 produits WOG sont crees en DB
+```bash
+npm run dev      # Développement → http://localhost:3000
+npm run build    # Build production
+npm run start    # Serveur production
+npm run lint     # ESLint
+```
+
+---
+
+## Structure du projet
+
+```
+src/
+├── app/
+│   ├── api/
+│   │   ├── auth/             # login, register, me, logout
+│   │   ├── admin/            # collections, produits, commandes,
+│   │   │                     # utilisateurs, stats, analytics,
+│   │   │                     # taches, postits, seed, setup
+│   │   └── produits/         # catalogue public
+│   ├── admin/                # Tableau de bord admin
+│   ├── boutique/             # Catalogue produits
+│   ├── connexion/            # Authentification
+│   ├── panier/               # Panier
+│   ├── paiement/             # Checkout
+│   └── profil/               # Espace client
+├── components/               # Composants réutilisables
+├── lib/
+│   ├── db.ts                 # Pool MySQL (mysql2/promise)
+│   └── jwt.ts                # Helpers JWT
+└── store/                    # Zustand stores
+schema.sql                    # Schéma MySQL 8.0 complet
+```
 
 ---
 
@@ -71,120 +129,103 @@ ADMIN_SETUP_KEY=wog-admin-setup-2026
 
 | Route | Description |
 |---|---|
-| / | Accueil |
-| /sneakers | Liste produits filtree |
-| /product/[slug] | Fiche produit |
-| /paiement | Wave / Orange / MTN / PayPal / Carte |
-| /admin | Dashboard KPIs + graphiques |
-| /admin/produits | CRUD produits + upload images |
-| /admin/crm | Rapports et statistiques temps reel |
-| /admin/commandes | Gestion commandes |
-| /admin/utilisateurs | Gestion clients |
-| /admin/setup | Creation compte admin |
+| `/` | Accueil |
+| `/boutique` | Catalogue produits (filtres genre, collection) |
+| `/boutique/[slug]` | Fiche produit |
+| `/panier` | Panier |
+| `/paiement` | Checkout (Stripe / Wave / Orange Money) |
+| `/connexion` | Authentification |
+| `/profil` | Espace client |
+| `/admin` | Dashboard KPIs + graphiques |
+| `/admin/produits` | CRUD produits |
+| `/admin/collections` | Gestion collections |
+| `/admin/commandes` | Gestion commandes |
+| `/admin/utilisateurs` | Gestion clients |
+| `/admin/crm` | Rapports analytics |
+| `/admin/setup` | Création/promotion compte admin |
 
 ---
 
 ## API Routes
 
-| Route | Description |
-|---|---|
-| /api/auth/register, login, logout | Authentification |
-| /api/produits | Catalogue public depuis DB |
-| /api/commandes | Commandes client connecte |
-| /api/admin/stats | KPIs dashboard |
-| /api/admin/analytics | Donnees graphiques (?period=6m/1y) |
-| /api/admin/commandes | Gestion commandes admin |
-| /api/admin/produits + [id] | CRUD produits |
-| /api/admin/taches + [id] | CRUD taches |
-| /api/admin/postits + [id] | CRUD post-its |
-| /api/admin/upload | Upload image multipart |
-| /api/admin/seed | Init 12 produits WOG |
-| /api/admin/setup | Cree ou promeut un admin |
-| /api/admin/utilisateurs | Liste clients |
-
----
-
-## Fonctionnalites cles
-
-### Dashboard Admin (/admin)
-- KPIs temps reel: CA total, commandes, clients, taux conversion (DB)
-- Graphique ventes mensuel + nouveaux clients (ApexCharts barres)
-- Objectif mensuel radial bar chart (cible 500 000 XOF)
-- 8 commandes recentes avec statut colore
-- Taches CRUD avec changement statut en 1 clic (DB)
-- Post-its colores (DB)
-
-### Produits (/admin/produits)
-- Grille avec badges statut/genre/stock
-- Creation et edition via modal: upload multi-images depuis galerie device
-- Gestion des tailles avec stock par taille
-- Recherche par nom, filtre par genre
-- Auto-generation slug
-
-### Upload images
-- Supabase Storage si env vars configurees (production)
-- Fallback local public/uploads/products/ (dev)
-- Validation JPG/PNG/WebP max 5 MB
-
-### Rapports (/admin/crm)
-- 4 KPI cards avec tendances
-- Graphique barres ventes kXOF + clients
-- Donut chart repartition commandes par statut
-- Top 5 produits par quantite vendue
-- Toggle 6 mois / 1 an
-
-### Paiement (/paiement)
-- Wave: logo officiel + redirect marchand ou formulaire
-- Orange Money: logo officiel + redirect ou formulaire
-- MTN Money: formulaire telephone
-- PayPal: logo officiel + redirect PayPal.me
-- Carte: logos Visa/Mastercard
-
 ### Authentification
-- JWT cookie HTTP-only wog_session
-- Roles CLIENT / ADMIN
-- Toutes routes /api/admin/* verifient role ADMIN
+| Méthode | Route | Description |
+|---|---|---|
+| POST | `/api/auth/login` | Connexion (email ou téléphone) |
+| POST | `/api/auth/register` | Inscription |
+| GET | `/api/auth/me` | Profil utilisateur connecté |
+| POST | `/api/auth/logout` | Déconnexion |
+
+### Boutique (public)
+| Méthode | Route | Description |
+|---|---|---|
+| GET | `/api/produits` | Catalogue (filtres : genre, statut, collection, slug) |
+
+### Admin (JWT ADMIN requis)
+| Méthode | Route | Description |
+|---|---|---|
+| GET / POST | `/api/admin/produits` | Liste / création |
+| GET / PATCH / DELETE | `/api/admin/produits/[id]` | Détail / modification / suppression |
+| GET / POST | `/api/admin/collections` | Liste / création |
+| PATCH / DELETE | `/api/admin/collections/[id]` | Modification / suppression |
+| GET / PATCH | `/api/admin/commandes` | Liste / mise à jour statut |
+| GET / POST | `/api/admin/utilisateurs` | Liste / création |
+| PATCH / DELETE | `/api/admin/utilisateurs/[id]` | Modification / suppression |
+| GET / POST | `/api/admin/taches` | Liste / création |
+| PATCH / DELETE | `/api/admin/taches/[id]` | Modification / suppression |
+| GET / POST | `/api/admin/postits` | Liste / création |
+| PATCH / DELETE | `/api/admin/postits/[id]` | Modification / suppression |
+| GET | `/api/admin/stats` | KPIs (CA, commandes, clients, conversion) |
+| GET | `/api/admin/analytics` | Graphiques ventes/clients (?period=6m/1y) |
+| POST | `/api/admin/seed` | Initialiser le catalogue (16 produits + admin) |
+| POST | `/api/admin/setup` | Créer ou promouvoir un compte admin |
 
 ---
 
-## Schema Prisma
+## Schéma base de données
 
-| Modele | Description |
+| Table | Description |
 |---|---|
-| Utilisateur | Comptes CLIENT/ADMIN |
-| Produit | Catalogue prix XOF |
-| ProduitImage | Images par produit |
-| ProduitTaille | Tailles + stock |
-| Commande | Commandes avec statut |
-| CommandeLigne | Lignes commande |
-| PanierItem | Panier DB |
-| Tache | Taches dashboard |
-| PostIt | Notes dashboard |
+| `utilisateurs` | Comptes CLIENT / ADMIN |
+| `collections` | Collections de vêtements |
+| `produits` | Catalogue, prix en XOF |
+| `produit_images` | Images par produit (ordonnées) |
+| `produit_tailles` | Tailles + stock par taille |
+| `commandes` | Commandes avec statut |
+| `commande_lignes` | Lignes de commande |
+| `panier_items` | Panier persisté en DB |
+| `taches` | Tâches du tableau de bord |
+| `postits` | Post-its du tableau de bord |
 
-Statuts: EN_ATTENTE > PAYE > EN_PREPARATION > EXPEDIE > LIVRE / ANNULE
+Statuts commande : `EN_ATTENTE` → `PAYE` → `EN_PREPARATION` → `EXPEDIE` → `LIVRE` / `ANNULE`
 
 ---
 
-## Deploiement Vercel
+## Hébergement LWS
 
 ```bash
-vercel --prod
+# 1. Exporter la base locale
+mysqldump -u root -p wog_database > backup.sql
+
+# 2. Importer sur LWS (phpMyAdmin ou SSH)
+mysql -u user_lws -p nom_base_lws < backup.sql
+
+# 3. Configurer .env en production
+DB_HOST=mysql.lws.fr   # ou l'hôte fourni par LWS
+DB_USER=user_lws
+DB_PASSWORD=...
+DB_NAME=nom_base_lws
+DB_PORT=3306
+
+# 4. Builder et démarrer
+npm run build
+npm run start  # ou configurer PM2
 ```
 
-Variables Vercel obligatoires: DATABASE_URL, ADMIN_SETUP_KEY
-Recommandees: NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY
-Optionnelles: NEXT_PUBLIC_WAVE_MERCHANT_URL, NEXT_PUBLIC_ORANGE_MERCHANT_URL, NEXT_PUBLIC_PAYPAL_MERCHANT_URL
-
-Apres deploiement: aller sur /admin/setup pour creer le compte admin.
-
----
-
-## Bouton WhatsApp
-
-Flottant sur toutes les pages --- +225 07 67 48 81 48
+> Les images produits sont dans `/public/images/` — les uploader via FTP.
 
 ---
 
 ## Licence
 
-Projet WOG-STYLE developpe a des fins de demonstration.
+Projet WOG-STYLE — tous droits réservés.

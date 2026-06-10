@@ -8,6 +8,8 @@ node_modules/
 # Variables d'environnement — NE JAMAIS COMMITER
 .env
 .env.local
+.env.test
+.env.production
 .env.*.local
 
 # Build outputs
@@ -34,8 +36,6 @@ desktop.ini
 # TypeScript
 *.tsbuildinfo
 next-env.d.ts
-
-/src/generated/prisma
 
 # Dossier de travail local (copie — le projet racine est la source)
 wog-style/
