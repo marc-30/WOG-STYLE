@@ -171,43 +171,41 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         )}
       </div>
 
-      {/* === ZONE INFORMATIONS PRODUIT ===
-          Padding asymétrique : plus de padding en bas qu'en haut */}
-      <div className="pt-3 pb-4 px-0">
+      {/* === ZONE INFORMATIONS PRODUIT === */}
+      <div className="pt-2.5 pb-4 px-0">
 
-        {/* Nom de la marque — texte court, noir, caractères légèrement espacés */}
-        <p className="text-xs font-bold uppercase tracking-wider text-end-black mb-0.5">
+        {/* Marque — petit, discret, rôle de sous-titre */}
+        <p className="text-[10px] font-semibold uppercase tracking-widest text-end-gray-mid mb-1">
           {product.brand}
         </p>
 
-        {/* Nom du produit — texte gris, une ligne, ellipsis si trop long */}
-        <p className="text-xs text-end-gray-dark truncate mb-2">
+        {/* Nom du produit — lisible, medium weight, une ligne */}
+        <p className="text-sm font-medium text-end-black truncate mb-2 leading-snug">
           {product.name}
         </p>
 
-        {/* === ZONE PRIX ===
-            Affichage différent selon le statut (soldé ou normal) */}
-        <div className="flex items-center gap-2">
+        {/* === PRIX — élément le plus visible === */}
+        <div className="flex items-baseline gap-2">
 
-          {/* Prix actuel — rouge si en solde, noir sinon */}
+          {/* Prix principal — bold, plus grand, accroche l'œil */}
           <span
-            className={`text-sm font-semibold ${
+            className={`text-base font-bold leading-none ${
               product.status === 'sale' ? 'text-end-red' : 'text-end-black'
             }`}
           >
             {formatPrice(product.price)}
           </span>
 
-          {/* Prix original barré — visible uniquement pour les articles soldés */}
+          {/* Prix barré — clairement secondaire */}
           {product.originalPrice && (
-            <span className="text-xs text-end-gray-mid line-through">
+            <span className="text-xs text-end-gray-mid line-through leading-none">
               {formatPrice(product.originalPrice)}
             </span>
           )}
 
-          {/* Pourcentage de réduction affiché entre parenthèses */}
+          {/* % réduction */}
           {discountPercent && (
-            <span className="text-xs text-end-red font-medium">
+            <span className="text-[11px] text-end-red font-semibold leading-none">
               -{discountPercent}%
             </span>
           )}
