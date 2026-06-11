@@ -40,18 +40,16 @@ const AdminHeader: React.FC = () => {
     <header className="sticky top-0 z-40 flex w-full bg-white border-b border-gray-200 dark:bg-gray-900 dark:border-gray-800">
       <div className="flex flex-1 items-center justify-between px-4 py-3 sm:px-6">
 
-        {/* Left: toggle + logo mobile */}
+        {/* Left: toggle desktop | logo mobile */}
         <div className="flex items-center gap-3">
+          {/* Bouton toggle sidebar — desktop uniquement */}
           <button onClick={handleToggle}
-            className="flex items-center justify-center w-10 h-10 text-gray-500 rounded-lg border border-gray-200 hover:bg-gray-100 dark:border-gray-800 dark:text-gray-400 dark:hover:bg-gray-800 transition-colors">
-            {isMobileOpen ? (
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
-            ) : (
-              <svg width="18" height="12" viewBox="0 0 18 12" fill="none"><path fillRule="evenodd" d="M0 1a1 1 0 011-1h16a1 1 0 010 2H1a1 1 0 01-1-1zm0 5a1 1 0 011-1h16a1 1 0 010 2H1a1 1 0 01-1-1zm0 5a1 1 0 011-1h9a1 1 0 010 2H1a1 1 0 01-1-1z" fill="currentColor"/></svg>
-            )}
+            className="hidden lg:flex items-center justify-center w-10 h-10 text-gray-500 rounded-lg border border-gray-200 hover:bg-gray-100 dark:border-gray-800 dark:text-gray-400 dark:hover:bg-gray-800 transition-colors">
+            <svg width="18" height="12" viewBox="0 0 18 12" fill="none"><path fillRule="evenodd" d="M0 1a1 1 0 011-1h16a1 1 0 010 2H1a1 1 0 01-1-1zm0 5a1 1 0 011-1h16a1 1 0 010 2H1a1 1 0 01-1-1zm0 5a1 1 0 011-1h9a1 1 0 010 2H1a1 1 0 01-1-1z" fill="currentColor"/></svg>
           </button>
 
-          <Link href="/admin" className="flex items-center gap-2 lg:hidden">
+          {/* Logo — toujours visible */}
+          <Link href="/admin" className="flex items-center gap-2">
             <div className="w-7 h-7 rounded-lg bg-brand-500 text-white font-black text-sm flex items-center justify-center">W</div>
             <span className="text-base font-black text-gray-800 dark:text-white/90 uppercase tracking-tight">WOG</span>
           </Link>

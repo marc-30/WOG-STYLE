@@ -133,9 +133,8 @@ const AdminSidebar: React.FC = () => {
 
   return (
     <aside
-      className={`fixed flex flex-col top-0 left-0 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 h-full transition-all duration-300 ease-in-out z-50 translate-x-0
-        ${isExpanded || isHovered ? 'lg:w-[260px]' : 'lg:w-[72px]'}
-        ${isMobileOpen ? 'w-[260px] shadow-2xl' : 'w-[72px]'}`}
+      className={`hidden lg:fixed lg:flex flex-col top-0 left-0 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 h-full transition-all duration-300 ease-in-out z-50
+        ${isExpanded || isHovered ? 'lg:w-[260px]' : 'lg:w-[72px]'}`}
       onMouseEnter={() => !isExpanded && setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}>
 
