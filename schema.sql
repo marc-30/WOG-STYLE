@@ -36,7 +36,7 @@ CREATE TABLE IF NOT EXISTS `collections` (
   `slug`        VARCHAR(191) NOT NULL,
   `nom`         VARCHAR(191) NOT NULL,
   `description` TEXT         NULL,
-  `imageUrl`    VARCHAR(191) NULL,
+  `imageUrl`    TEXT         NULL,
   `actif`       TINYINT(1)   NOT NULL DEFAULT 1,
   `createdAt`   DATETIME(3)  NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
   PRIMARY KEY (`id`),
@@ -71,7 +71,7 @@ CREATE TABLE IF NOT EXISTS `produits` (
 -- ── Images produits ───────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS `produit_images` (
   `id`        VARCHAR(36)  NOT NULL DEFAULT (UUID()),
-  `url`       VARCHAR(191) NOT NULL,
+  `url`       TEXT         NOT NULL,
   `ordre`     INT          NOT NULL DEFAULT 0,
   `isHover`   TINYINT(1)   NOT NULL DEFAULT 0,
   `produitId` VARCHAR(36)  NOT NULL,
