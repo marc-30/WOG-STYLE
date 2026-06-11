@@ -106,7 +106,7 @@ export const Header: React.FC = () => {
           <div className="flex items-center justify-center h-9 gap-3">
             <span className="text-xs text-white/90 font-semibold hidden sm:block">📍 Abidjan, Côte d&apos;Ivoire</span>
             <span className="text-xs text-white/90 font-semibold hidden sm:block">|</span>
-            <span className="text-xs text-white/90 font-semibold">+225 05 75 39 43 20</span>
+            <span className="text-xs text-white/90 font-semibold">05 85 49 48 48</span>
           </div>
         </div>
       </div>

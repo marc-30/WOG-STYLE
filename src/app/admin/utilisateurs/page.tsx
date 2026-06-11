@@ -281,7 +281,7 @@ export default function UtilisateursPage() {
               </div>
               <div>
                 <label className="block text-theme-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Téléphone</label>
-                <input type="tel" placeholder="+225 05 75 39 43 20" value={form.telephone}
+                <input type="tel" placeholder="05 85 49 48 48" value={form.telephone}
                   onChange={e => setForm(f => ({ ...f, telephone: e.target.value }))}
                   className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 focus:outline-none focus:border-brand-400" />
               </div>

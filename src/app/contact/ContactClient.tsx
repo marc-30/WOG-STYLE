@@ -45,7 +45,7 @@ export const ContactClient: React.FC = () => {
               },
               {
                 titre: 'Téléphone',
-                lignes: ['+221 77 000 00 00'],
+                lignes: ['05 85 49 48 48'],
               },
             ].map((info) => (
               <div key={info.titre}>

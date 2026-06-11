@@ -20,7 +20,7 @@ export const WhatsAppButton: React.FC = () => {
   const [showTooltip, setShowTooltip] = useState(false)
 
   const whatsappUrl =
-    'https://wa.me/2250767488148?text=Bonjour%20WOG-STYLE%2C%20j%27ai%20besoin%20d%27aide.'
+    'https://wa.me/2250585494848?text=Bonjour%20WOG-STYLE%2C%20j%27ai%20besoin%20d%27aide.'
 
   return (
     <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-2">
