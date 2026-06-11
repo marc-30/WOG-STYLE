@@ -1,11 +1,11 @@
--- Migration 001 — Agrandir les colonnes URL pour les images
--- À exécuter UNE FOIS sur la base de production (PlanetScale / LWS / etc.)
+-- Migration 001 — URL images → MEDIUMTEXT
+-- À exécuter UNE FOIS sur la base de production
 --
--- Problème : VARCHAR(191) trop court pour stocker des URLs Vercel Blob
--- Fix    : passer à TEXT (65 535 chars, largement suffisant)
+-- Problème : VARCHAR(191) trop court pour stocker les images en base64
+-- Fix      : MEDIUMTEXT (jusqu'à 16 Mo par image, largement suffisant)
 
 ALTER TABLE `produit_images`
-  MODIFY COLUMN `url` TEXT NOT NULL;
+  MODIFY COLUMN `url` MEDIUMTEXT NOT NULL;
 
 ALTER TABLE `collections`
-  MODIFY COLUMN `imageUrl` TEXT NULL;
+  MODIFY COLUMN `imageUrl` MEDIUMTEXT NULL;
