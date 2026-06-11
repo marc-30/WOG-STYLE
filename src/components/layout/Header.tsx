@@ -6,7 +6,7 @@
 
 'use client'
 
-import React, { useState, useRef, useCallback } from 'react'
+import React, { useState, useRef, useCallback, useEffect } from 'react'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useScrollHeader } from '@/hooks/useScrollHeader'
@@ -66,10 +66,13 @@ export const Header: React.FC = () => {
   const closeTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const [isSearchOpen, setIsSearchOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
-  const [activeGenre, setActiveGenre] = useState<'men' | 'women'>('men')
-
   /* Menu mobile */
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+
+  useEffect(() => {
+    document.body.style.overflow = isMobileMenuOpen ? 'hidden' : ''
+    return () => { document.body.style.overflow = '' }
+  }, [isMobileMenuOpen])
 
   /* Mega-menu handlers */
   const handleNavItemEnter = useCallback((item: NavItem) => {
@@ -228,68 +231,98 @@ export const Header: React.FC = () => {
       <AnimatePresence>
         {isMobileMenuOpen && (
           <>
-            {/* Overlay */}
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/50 z-70 lg:hidden"
-              onClick={() => setIsMobileMenuOpen(false)} aria-hidden="true" />
+            {/* Overlay flouté */}
+            <motion.div
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              transition={{ duration: 0.25 }}
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-70 lg:hidden"
+              onClick={() => setIsMobileMenuOpen(false)} aria-hidden="true"
+            />
 
             {/* Drawer */}
             <motion.div
               initial={{ x: '-100%' }} animate={{ x: 0 }} exit={{ x: '-100%' }}
-              transition={{ duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
-              className="fixed top-0 left-0 h-full w-80 max-w-[85vw] bg-end-white z-70 flex flex-col lg:hidden shadow-2xl"
-              role="dialog" aria-label="Menu principal" aria-modal="true">
-
-              {/* Header du drawer */}
-              <div className="flex items-center justify-between px-5 py-4 border-b border-end-gray-border">
+              transition={{ duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] }}
+              className="fixed top-0 left-0 h-screen w-[300px] max-w-[88vw] bg-white z-80 flex flex-col lg:hidden"
+              role="dialog" aria-label="Menu principal" aria-modal="true"
+            >
+              {/* ── En-tête drawer : fond noir ── */}
+              <div className="bg-end-black px-6 py-5 flex items-center justify-between flex-shrink-0">
                 <Link href="/" onClick={() => setIsMobileMenuOpen(false)}>
-                  <WogLogo className="h-9 w-9 object-contain" />
+                  <span className="text-white font-black text-lg uppercase tracking-tight">WOG STYLE</span>
                 </Link>
-                <button type="button" onClick={() => setIsMobileMenuOpen(false)}
+                <button
+                  type="button"
+                  onClick={() => setIsMobileMenuOpen(false)}
                   aria-label="Fermer le menu"
-                  className="text-end-black hover:opacity-60 transition-opacity p-1">
+                  className="w-8 h-8 rounded-full border border-white/25 flex items-center justify-center text-white hover:bg-white/10 transition-colors"
+                >
                   <CloseIcon />
                 </button>
               </div>
 
-              {/* Navigation links */}
-              <nav className="flex-1 overflow-y-auto py-4">
+              {/* ── Navigation ── */}
+              <nav className="flex-1 overflow-y-auto">
                 <ul>
-                  {NAV_ITEMS.map((item) => (
-                    <li key={item.label}>
-                      <Link href={item.href}
+                  {NAV_ITEMS.map((item, i) => (
+                    <motion.li
+                      key={item.label}
+                      initial={{ opacity: 0, x: -12 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.06 + i * 0.045, duration: 0.2 }}
+                    >
+                      <Link
+                        href={item.href}
                         onClick={() => setIsMobileMenuOpen(false)}
-                        className={`flex items-center justify-between px-5 py-4 text-sm font-bold uppercase tracking-wider border-b border-end-gray-border/50 transition-colors hover:bg-end-gray-light ${
+                        className={`group flex items-center justify-between px-6 py-[15px] border-b border-end-gray-border/40 transition-all duration-150 hover:bg-end-black hover:text-white ${
                           item.highlighted ? 'text-end-red' : 'text-end-black'
-                        }`}>
-                        {item.label}
-                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                          <path d="M4 2l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                        }`}
+                      >
+                        <span className="text-[12px] font-bold uppercase tracking-[0.13em]">{item.label}</span>
+                        <svg width="13" height="13" viewBox="0 0 13 13" fill="none"
+                          className="opacity-30 group-hover:opacity-80 group-hover:translate-x-0.5 transition-all duration-150">
+                          <path d="M4.5 2.5l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                         </svg>
                       </Link>
-                    </li>
+                    </motion.li>
                   ))}
                 </ul>
 
-                {/* Liens secondaires */}
-                <div className="px-5 pt-6 space-y-4">
-                  <Link href="/connexion" onClick={() => setIsMobileMenuOpen(false)}
-                    className="flex items-center gap-3 text-sm text-end-black hover:opacity-60 transition-opacity">
+                {/* ── Actions : compte + panier ── */}
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.06 + NAV_ITEMS.length * 0.045 + 0.05, duration: 0.2 }}
+                  className="px-6 pt-6 pb-4 space-y-3"
+                >
+                  <Link
+                    href={isAuthenticated ? '/profil' : '/connexion'}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="flex items-center gap-3 w-full px-4 py-3 border border-end-gray-border text-end-black hover:bg-end-black hover:text-white hover:border-end-black transition-all duration-150"
+                  >
                     <AccountIcon />
-                    <span className="font-semibold">Mon compte</span>
+                    <span className="text-[11px] font-bold uppercase tracking-widest">Mon compte</span>
                   </Link>
-                  <button type="button" onClick={() => { setIsMobileMenuOpen(false); toggleCart() }}
-                    className="flex items-center gap-3 text-sm text-end-black hover:opacity-60 transition-opacity">
+                  <button
+                    type="button"
+                    onClick={() => { setIsMobileMenuOpen(false); toggleCart() }}
+                    className="flex items-center gap-3 w-full px-4 py-3 bg-end-black text-white hover:bg-end-black/80 transition-colors duration-150"
+                  >
                     <BagIcon />
-                    <span className="font-semibold">Panier {totalItems > 0 && `(${totalItems})`}</span>
+                    <span className="text-[11px] font-bold uppercase tracking-widest flex-1 text-left">Panier</span>
+                    {totalItems > 0 && (
+                      <span className="bg-white text-end-black text-[10px] font-black px-1.5 py-0.5 rounded-full leading-none">
+                        {totalItems > 9 ? '9+' : totalItems}
+                      </span>
+                    )}
                   </button>
-                </div>
+                </motion.div>
               </nav>
 
-              {/* Footer du drawer */}
-              <div className="px-5 py-4 border-t border-end-gray-border bg-end-gray-light">
-                <p className="text-xs text-end-gray-mid text-center">
-                  Livraison gratuite dès 50 000 XOF
+              {/* ── Footer drawer ── */}
+              <div className="bg-end-black px-6 py-4 flex-shrink-0">
+                <p className="text-[10px] text-white/50 tracking-widest uppercase text-center">
+                  Abidjan — Livraison gratuite dès 50 000 XOF
                 </p>
               </div>
             </motion.div>
