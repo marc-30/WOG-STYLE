@@ -85,15 +85,16 @@ export default function UtilisateursPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800 dark:text-white/90">Gestion utilisateurs</h1>
-          <p className="mt-1 text-theme-sm text-gray-500 dark:text-gray-400">
-            {admins.length} administrateur{admins.length > 1 ? 's' : ''} · {clients.length} client{clients.length > 1 ? 's' : ''}
+          <h1 className="text-xl font-bold text-gray-800 dark:text-white/90">Utilisateurs</h1>
+          <p className="mt-0.5 text-xs text-gray-400 dark:text-gray-500">
+            {admins.length} admin{admins.length > 1 ? 's' : ''} · {clients.length} client{clients.length > 1 ? 's' : ''}
           </p>
         </div>
         <button onClick={() => setTab('creer')}
-          className="inline-flex items-center gap-1.5 rounded-lg bg-brand-500 px-4 py-2 text-theme-sm font-medium text-white hover:bg-brand-600 transition-colors">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 5v14M5 12h14"/></svg>
-          Nouvel utilisateur
+          className="inline-flex items-center gap-1.5 rounded-xl bg-brand-500 px-3.5 py-2 text-xs font-semibold text-white hover:bg-brand-600 transition-colors shadow-sm">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 5v14M5 12h14"/></svg>
+          <span className="hidden sm:inline">Nouvel utilisateur</span>
+          <span className="sm:hidden">Nouveau</span>
         </button>
       </div>
 
@@ -129,61 +130,119 @@ export default function UtilisateursPage() {
               Aucun utilisateur pour le moment.
             </div>
           ) : (
-            <div className="max-w-full overflow-x-auto">
-              <Table>
-                <TableHeader className="border-gray-100 dark:border-gray-800 border-y bg-gray-50 dark:bg-white/[0.02]">
-                  <TableRow>
-                    {['Utilisateur', 'Contact', 'Rôle', 'Statut', 'Commandes', 'Inscription', 'Actions'].map(h => (
-                      <TableCell key={h} isHeader className="px-4 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">{h}</TableCell>
-                    ))}
-                  </TableRow>
-                </TableHeader>
-                <TableBody className="divide-y divide-gray-100 dark:divide-gray-800">
-                  {users.map(u => (
-                    <TableRow key={u.id} className="hover:bg-gray-50 dark:hover:bg-white/[0.02] transition-colors">
-                      <TableCell className="px-4 py-3">
-                        <div className="flex items-center gap-3">
-                          <div className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold text-white flex-shrink-0 ${u.role === 'ADMIN' ? 'bg-brand-500' : 'bg-gray-400 dark:bg-gray-600'}`}>
-                            {u.prenom[0]}{u.nom[0]}
-                          </div>
-                          <div>
-                            <p className="text-theme-sm font-medium text-gray-800 dark:text-white/90">{u.prenom} {u.nom}</p>
-                            <p className="text-theme-xs text-gray-400 dark:text-gray-500">{u.id.slice(0, 8)}…</p>
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell className="px-4 py-3">
-                        <p className="text-theme-sm text-gray-600 dark:text-gray-300">{u.email || '—'}</p>
-                        <p className="text-theme-xs text-gray-400 dark:text-gray-500">{u.telephone || '—'}</p>
-                      </TableCell>
-                      <TableCell className="px-4 py-3">
-                        <Badge size="sm" color={u.role === 'ADMIN' ? 'primary' : 'light'}>{u.role}</Badge>
-                      </TableCell>
-                      <TableCell className="px-4 py-3">
-                        <Badge size="sm" color={u.actif ? 'success' : 'error'}>{u.actif ? 'Actif' : 'Inactif'}</Badge>
-                      </TableCell>
-                      <TableCell className="px-4 py-3 text-theme-sm text-gray-600 dark:text-gray-300">{u._count?.commandes ?? 0}</TableCell>
-                      <TableCell className="px-4 py-3 text-theme-xs text-gray-400 dark:text-gray-500">
+            <>
+              {/* ── Vue mobile : cards ── */}
+              <div className="divide-y divide-gray-100 dark:divide-gray-800 lg:hidden">
+                {users.map(u => (
+                  <div key={u.id} className="px-4 py-4 space-y-2.5">
+                    {/* Ligne 1 : nom + badges */}
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="text-sm font-light text-gray-500 dark:text-gray-400 leading-none mb-0.5">
+                          {u.prenom}
+                        </p>
+                        <p className="text-base font-semibold text-gray-800 dark:text-white/90 leading-tight truncate">
+                          {u.nom.toUpperCase()}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-1.5 flex-shrink-0 mt-0.5">
+                        <Badge size="sm" color={u.role === 'ADMIN' ? 'primary' : 'light'}>
+                          {u.role}
+                        </Badge>
+                        <Badge size="sm" color={u.actif ? 'success' : 'error'}>
+                          {u.actif ? 'Actif' : 'Inactif'}
+                        </Badge>
+                      </div>
+                    </div>
+
+                    {/* Ligne 2 : contact */}
+                    <p className="text-xs text-gray-400 dark:text-gray-500 truncate">
+                      {u.email || u.telephone || '—'}
+                    </p>
+
+                    {/* Ligne 3 : méta + actions */}
+                    <div className="flex items-center justify-between">
+                      <span className="text-[11px] text-gray-400 dark:text-gray-600">
+                        {u._count?.commandes ?? 0} commande{(u._count?.commandes ?? 0) !== 1 ? 's' : ''}
+                        {' · '}
                         {new Date(u.createdAt).toLocaleDateString('fr-FR')}
-                      </TableCell>
-                      <TableCell className="px-4 py-3">
-                        <div className="flex items-center gap-2">
-                          <button onClick={() => { setEditUser({ ...u }); setShowEdit(true) }}
-                            className="text-theme-xs text-brand-500 hover:text-brand-700 font-medium dark:text-brand-400">
-                            Modifier
-                          </button>
-                          <span className="text-gray-200 dark:text-gray-700">|</span>
-                          <button onClick={() => handleDelete(u.id)}
-                            className="text-theme-xs text-error-500 hover:text-error-700 font-medium dark:text-error-400">
-                            Supprimer
-                          </button>
-                        </div>
-                      </TableCell>
+                      </span>
+                      <div className="flex items-center gap-3">
+                        <button
+                          onClick={() => { setEditUser({ ...u }); setShowEdit(true) }}
+                          className="text-xs font-medium text-brand-500 dark:text-brand-400"
+                        >
+                          Modifier
+                        </button>
+                        <button
+                          onClick={() => handleDelete(u.id)}
+                          className="text-xs font-medium text-red-400 dark:text-red-400"
+                        >
+                          Supprimer
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* ── Vue desktop : tableau ── */}
+              <div className="hidden lg:block max-w-full overflow-x-auto">
+                <Table>
+                  <TableHeader className="border-gray-100 dark:border-gray-800 border-y bg-gray-50 dark:bg-white/[0.02]">
+                    <TableRow>
+                      {['Utilisateur', 'Contact', 'Rôle', 'Statut', 'Commandes', 'Inscription', 'Actions'].map(h => (
+                        <TableCell key={h} isHeader className="px-4 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">{h}</TableCell>
+                      ))}
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
+                  </TableHeader>
+                  <TableBody className="divide-y divide-gray-100 dark:divide-gray-800">
+                    {users.map(u => (
+                      <TableRow key={u.id} className="hover:bg-gray-50 dark:hover:bg-white/[0.02] transition-colors">
+                        <TableCell className="px-4 py-3">
+                          <div className="flex items-center gap-3">
+                            <div className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold text-white flex-shrink-0 ${u.role === 'ADMIN' ? 'bg-brand-500' : 'bg-gray-400 dark:bg-gray-600'}`}>
+                              {u.prenom[0]}{u.nom[0]}
+                            </div>
+                            <div>
+                              <p className="text-theme-sm font-medium text-gray-800 dark:text-white/90">{u.prenom} {u.nom}</p>
+                              <p className="text-theme-xs text-gray-400 dark:text-gray-500">{u.id.slice(0, 8)}…</p>
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell className="px-4 py-3">
+                          <p className="text-theme-sm text-gray-600 dark:text-gray-300">{u.email || '—'}</p>
+                          <p className="text-theme-xs text-gray-400 dark:text-gray-500">{u.telephone || '—'}</p>
+                        </TableCell>
+                        <TableCell className="px-4 py-3">
+                          <Badge size="sm" color={u.role === 'ADMIN' ? 'primary' : 'light'}>{u.role}</Badge>
+                        </TableCell>
+                        <TableCell className="px-4 py-3">
+                          <Badge size="sm" color={u.actif ? 'success' : 'error'}>{u.actif ? 'Actif' : 'Inactif'}</Badge>
+                        </TableCell>
+                        <TableCell className="px-4 py-3 text-theme-sm text-gray-600 dark:text-gray-300">{u._count?.commandes ?? 0}</TableCell>
+                        <TableCell className="px-4 py-3 text-theme-xs text-gray-400 dark:text-gray-500">
+                          {new Date(u.createdAt).toLocaleDateString('fr-FR')}
+                        </TableCell>
+                        <TableCell className="px-4 py-3">
+                          <div className="flex items-center gap-2">
+                            <button onClick={() => { setEditUser({ ...u }); setShowEdit(true) }}
+                              className="text-theme-xs text-brand-500 hover:text-brand-700 font-medium dark:text-brand-400">
+                              Modifier
+                            </button>
+                            <span className="text-gray-200 dark:text-gray-700">|</span>
+                            <button onClick={() => handleDelete(u.id)}
+                              className="text-theme-xs text-error-500 hover:text-error-700 font-medium dark:text-error-400">
+                              Supprimer
+                            </button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </>
           )}
         </div>
       )}
