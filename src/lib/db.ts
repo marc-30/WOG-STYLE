@@ -7,7 +7,7 @@ declare global {
   var _mysqlPool: mysql.Pool | undefined
 }
 
-const pool = globalThis._mysqlPool ?? mysql.createPool({
+const rawPool = globalThis._mysqlPool ?? mysql.createPool({
   host:            process.env.DB_HOST     ?? 'localhost',
   user:            process.env.DB_USER     ?? 'root',
   password:        process.env.DB_PASSWORD ?? '',
@@ -20,9 +20,37 @@ const pool = globalThis._mysqlPool ?? mysql.createPool({
   queueLimit:      0,
   timezone:        '+00:00',
   decimalNumbers:  true,
+  enableKeepAlive: true,
+  keepAliveInitialDelay: 10000,
 })
 
 // En dev uniquement : stocker dans globalThis pour survivre aux hot-reloads
-if (process.env.NODE_ENV !== 'production') globalThis._mysqlPool = pool
+if (process.env.NODE_ENV !== 'production') globalThis._mysqlPool = rawPool
+
+// L'hébergement mutualisé (LWS) ferme les connexions inactives plus vite que les
+// instances Vercel ne restent "chaudes" entre deux requêtes → la requête suivante
+// tombe parfois sur une connexion déjà fermée (PROTOCOL_CONNECTION_LOST). Le pool
+// mysql2 évince la connexion mais la requête en cours échoue quand même : on la
+// retente une fois, cette fois sur une connexion fraîche.
+const RETRYABLE_CODES = new Set(['PROTOCOL_CONNECTION_LOST', 'ECONNRESET', 'ETIMEDOUT', 'ECONNREFUSED'])
+
+const pool = new Proxy(rawPool, {
+  get(target, prop, receiver) {
+    if (prop === 'execute') {
+      return async (...args: Parameters<typeof target.execute>) => {
+        try {
+          return await target.execute(...args)
+        } catch (error) {
+          const code = error && typeof error === 'object' && 'code' in error ? (error as { code: string }).code : undefined
+          if (code && RETRYABLE_CODES.has(code)) {
+            return await target.execute(...args)
+          }
+          throw error
+        }
+      }
+    }
+    return Reflect.get(target, prop, receiver)
+  },
+}) as mysql.Pool
 
 export default pool
