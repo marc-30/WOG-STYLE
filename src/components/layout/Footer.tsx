@@ -277,10 +277,15 @@ export const Footer: React.FC = () => {
         <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
 
-            {/* Copyright */}
-            <p className="text-xs text-end-white/40 order-2 sm:order-1">
-              © {new Date().getFullYear()} WOG-STYLE. Tous droits réservés.
-            </p>
+            {/* Copyright + localisation */}
+            <div className="flex flex-col sm:flex-row items-center gap-2 order-2 sm:order-1 text-center sm:text-left">
+              <p className="text-xs text-end-white/40">
+                © {new Date().getFullYear()} WOG-STYLE. Tous droits réservés.
+              </p>
+              <p className="text-xs text-end-white/40 uppercase tracking-[0.12em]">
+                ABIDJAN | CÔTE D'IVOIRE
+              </p>
+            </div>
 
             {/* Logos des moyens de paiement (SVG simplifiés) */}
             <div className="flex items-center gap-3 order-1 sm:order-2">

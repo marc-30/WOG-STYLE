@@ -1,12 +1,17 @@
 'use client'
 import { useState, useEffect } from 'react'
+import Link from 'next/link'
+import { uploadCompressedImage } from '@/lib/compressImage'
 
 interface Collection {
   id: string
   slug: string
   nom: string
+  tagline: string | null
   description: string | null
   imageUrl: string | null
+  heroImage: string | null
+  hoverImage: string | null
   actif: boolean
   createdAt: string
   _count?: { produits: number }
@@ -15,7 +20,7 @@ interface Collection {
 type ModalMode = 'create' | 'edit'
 
 function emptyForm() {
-  return { nom: '', description: '', imageUrl: '', actif: true }
+  return { nom: '', tagline: '', description: '', imageUrl: '', heroImage: '', hoverImage: '', actif: true }
 }
 
 const inputCls = 'w-full px-3 py-2 text-sm border border-gray-200 rounded-lg bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 focus:outline-none focus:border-brand-400'
@@ -28,6 +33,7 @@ export default function AdminCollectionsPage() {
   })
   const [form, setForm] = useState(emptyForm())
   const [saving, setSaving] = useState(false)
+  const [uploadingField, setUploadingField] = useState<'imageUrl' | 'heroImage' | null>(null)
   const [msg, setMsg] = useState('')
   const [msgType, setMsgType] = useState<'ok' | 'err'>('ok')
 
@@ -53,8 +59,26 @@ export default function AdminCollectionsPage() {
   }
 
   const openEdit = (c: Collection) => {
-    setForm({ nom: c.nom, description: c.description ?? '', imageUrl: c.imageUrl ?? '', actif: c.actif })
+    setForm({
+      nom: c.nom, tagline: c.tagline ?? '', description: c.description ?? '',
+      imageUrl: c.imageUrl ?? '', heroImage: c.heroImage ?? '', hoverImage: c.hoverImage ?? '',
+      actif: c.actif,
+    })
     setModal({ open: true, mode: 'edit', collection: c })
+  }
+
+  const handleImageUpload = async (field: 'imageUrl' | 'heroImage', file: File | undefined) => {
+    if (!file) return
+    if (!file.type.startsWith('image/')) { showMsg('Format non supporté. Utilisez JPG, PNG ou WebP.', 'err'); return }
+    if (file.size > 15 * 1024 * 1024) { showMsg('Fichier trop volumineux (max 15 Mo).', 'err'); return }
+    setUploadingField(field)
+    try {
+      const url = await uploadCompressedImage(file, 'collections')
+      setForm(f => ({ ...f, [field]: url }))
+    } catch (err) {
+      showMsg(err instanceof Error ? err.message : 'Impossible de téléverser l\'image.', 'err')
+    }
+    setUploadingField(null)
   }
 
   const handleSave = async (e: React.FormEvent) => {
@@ -72,8 +96,11 @@ export default function AdminCollectionsPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           nom: form.nom.trim(),
+          tagline: form.tagline || null,
           description: form.description || null,
           imageUrl: form.imageUrl || null,
+          heroImage: form.heroImage || null,
+          hoverImage: form.hoverImage || null,
           actif: form.actif,
         }),
       })
@@ -203,6 +230,12 @@ export default function AdminCollectionsPage() {
                   </td>
                   <td className="px-4 py-4 text-right">
                     <div className="flex items-center justify-end gap-2">
+                      <Link
+                        href={`/admin/collections/${c.id}`}
+                        className="rounded-lg border border-gray-200 px-3 py-1.5 text-theme-xs font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-white/5 transition-colors"
+                      >
+                        Sous-collections
+                      </Link>
                       <button
                         onClick={() => openEdit(c)}
                         className="rounded-lg border border-brand-200 px-3 py-1.5 text-theme-xs font-medium text-brand-600 hover:bg-brand-50 dark:border-brand-500/30 dark:text-brand-400 dark:hover:bg-brand-500/10 transition-colors"
@@ -263,6 +296,20 @@ export default function AdminCollectionsPage() {
                 )}
               </div>
 
+              {/* Tagline */}
+              <div>
+                <label className="block text-theme-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Accroche
+                </label>
+                <input
+                  type="text"
+                  value={form.tagline}
+                  onChange={e => setForm(f => ({ ...f, tagline: e.target.value }))}
+                  className={inputCls}
+                  placeholder="L'origine. Le commencement."
+                />
+              </div>
+
               {/* Description */}
               <div>
                 <label className="block text-theme-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -277,24 +324,43 @@ export default function AdminCollectionsPage() {
                 />
               </div>
 
-              {/* Image URL */}
+              {/* Image de couverture */}
               <div>
                 <label className="block text-theme-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Image de couverture (URL)
+                  Image de couverture <span className="text-gray-400 font-normal">(vignette grille /collection)</span>
                 </label>
-                <input
-                  type="text"
-                  value={form.imageUrl}
-                  onChange={e => setForm(f => ({ ...f, imageUrl: e.target.value }))}
-                  className={inputCls}
-                  placeholder="/images/collection-eden.jpg ou https://..."
-                />
-                {form.imageUrl && (
-                  <div className="mt-2 w-20 h-20 rounded-lg overflow-hidden border border-gray-200">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={form.imageUrl} alt="preview" className="w-full h-full object-cover" onError={e => { (e.target as HTMLImageElement).style.display = 'none' }} />
-                  </div>
-                )}
+                <div className="flex items-center gap-3">
+                  {form.imageUrl && (
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img src={form.imageUrl} alt="preview" className="w-16 h-16 rounded-lg object-cover border border-gray-200 dark:border-gray-700" />
+                  )}
+                  <label className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 dark:border-gray-700 px-3 py-1.5 text-theme-xs font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 cursor-pointer transition-colors">
+                    {uploadingField === 'imageUrl' ? 'Envoi...' : form.imageUrl ? 'Changer' : 'Choisir un fichier'}
+                    <input type="file" accept="image/*" className="hidden" disabled={uploadingField !== null}
+                      onChange={e => handleImageUpload('imageUrl', e.target.files?.[0])} />
+                  </label>
+                </div>
+              </div>
+
+              {/* Image hero */}
+              <div>
+                <label className="block text-theme-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Image hero <span className="text-gray-400 font-normal">(grand format, page collection)</span>
+                </label>
+                <div className="flex items-center gap-3">
+                  {form.heroImage && (
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img src={form.heroImage} alt="preview" className="w-16 h-16 rounded-lg object-cover border border-gray-200 dark:border-gray-700" />
+                  )}
+                  <label className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 dark:border-gray-700 px-3 py-1.5 text-theme-xs font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 cursor-pointer transition-colors">
+                    {uploadingField === 'heroImage' ? 'Envoi...' : form.heroImage ? 'Changer' : 'Choisir un fichier'}
+                    <input type="file" accept="image/*" className="hidden" disabled={uploadingField !== null}
+                      onChange={e => handleImageUpload('heroImage', e.target.files?.[0])} />
+                  </label>
+                </div>
+                <p className="mt-1 text-[11px] text-gray-400">
+                  Une fois définie, la collection apparaît automatiquement sur la page /collection.
+                </p>
               </div>
 
               {/* Statut */}
@@ -316,7 +382,7 @@ export default function AdminCollectionsPage() {
               <div className="flex gap-3 pt-2 border-t border-gray-100 dark:border-gray-800">
                 <button
                   type="submit"
-                  disabled={saving}
+                  disabled={saving || uploadingField !== null}
                   className="flex-1 rounded-lg bg-brand-500 py-2.5 text-sm font-semibold text-white hover:bg-brand-600 disabled:opacity-60 transition-colors"
                 >
                   {saving ? 'Enregistrement...' : modal.mode === 'create' ? 'Créer la collection' : 'Enregistrer'}

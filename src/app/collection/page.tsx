@@ -7,8 +7,12 @@
 
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import { RowDataPacket } from 'mysql2'
+import pool from '@/lib/db'
 import productsData from '@/data/products.json'
 import type { Product } from '@/types'
+
+export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
   title: 'Collections | WOG-STYLE',
@@ -17,6 +21,27 @@ export const metadata: Metadata = {
 }
 
 const allProducts = productsData as Product[]
+
+interface DbCollectionRow extends RowDataPacket {
+  slug: string; nom: string; tagline: string | null
+  imageUrl: string | null; hoverImage: string | null; createdAt: string; pieces: number
+}
+
+async function getDbCollections() {
+  try {
+    const [rows] = await pool.execute<DbCollectionRow[]>(
+      `SELECT c.slug, c.nom, c.tagline, c.imageUrl, c.hoverImage, c.createdAt, COUNT(p.id) AS pieces
+       FROM collections c
+       LEFT JOIN produits p ON p.collectionId = c.id AND p.actif = 1
+       WHERE c.actif = 1 AND c.heroImage IS NOT NULL
+       GROUP BY c.id
+       ORDER BY c.createdAt DESC`
+    )
+    return rows
+  } catch {
+    return []
+  }
+}
 
 /* Définition des collections */
 const COLLECTIONS = [
@@ -74,7 +99,9 @@ const COLLECTIONS = [
   },
 ]
 
-export default function CollectionPage() {
+export default async function CollectionPage() {
+  const dbCollections = await getDbCollections()
+
   return (
     <div>
 
@@ -149,6 +176,52 @@ export default function CollectionPage() {
                   <p className="text-sm text-end-white/70 italic mb-5 max-w-sm leading-relaxed">
                     {collection.tagline}
                   </p>
+
+                  {/* CTA */}
+                  <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-end-white border-b border-end-white pb-0.5 w-fit group-hover:gap-4 transition-all">
+                    Explorer
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                      <path d="M2 6h8M7 3l3 3-3 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </span>
+                </div>
+              </Link>
+            ))}
+
+            {dbCollections.map((collection) => (
+              <Link
+                key={collection.slug}
+                href={`/collection/${collection.slug}`}
+                className="group relative block overflow-hidden bg-end-white"
+                style={{ minHeight: '60vh' }}
+              >
+                {/* Image de couverture */}
+                <img
+                  src={collection.imageUrl ?? collection.hoverImage ?? ''}
+                  alt={collection.nom}
+                  className="absolute inset-0 w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-105"
+                />
+
+                {/* Overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-transparent transition-opacity duration-300" />
+
+                {/* Contenu texte */}
+                <div className="absolute inset-0 flex flex-col justify-end p-8">
+                  <span className="inline-block text-2xs font-bold uppercase tracking-widest bg-end-white/20 backdrop-blur-sm text-end-white px-3 py-1 mb-4 w-fit">
+                    {collection.pieces} pièce{collection.pieces !== 1 ? 's' : ''}
+                  </span>
+
+                  <p className="text-xs font-bold uppercase tracking-widest text-end-white/60 mb-2">
+                    Collection {new Date(collection.createdAt).getFullYear()}
+                  </p>
+                  <h2 className="text-3xl sm:text-4xl font-black uppercase text-end-white leading-none mb-3">
+                    {collection.nom}
+                  </h2>
+                  {collection.tagline && (
+                    <p className="text-sm text-end-white/70 italic mb-5 max-w-sm leading-relaxed">
+                      {collection.tagline}
+                    </p>
+                  )}
 
                   {/* CTA */}
                   <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-end-white border-b border-end-white pb-0.5 w-fit group-hover:gap-4 transition-all">

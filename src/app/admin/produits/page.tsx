@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
 import Badge from '../_components/Badge'
+import { uploadCompressedImage } from '@/lib/compressImage'
 
 interface ProduitImage { id?: string; url: string; ordre: number; isHover: boolean }
 interface ProduitTaille { id?: string; label: string; stock: number; disponible: boolean }
@@ -89,28 +90,6 @@ export default function AdminProduitsPage() {
     setModal({ open: true, mode: 'edit', produit: p })
   }
 
-  const compressImage = (file: File): Promise<string> =>
-    new Promise((resolve, reject) => {
-      const reader = new FileReader()
-      reader.onload = (ev) => {
-        const img = new window.Image()
-        img.onload = () => {
-          const MAX_W = 1200
-          let w = img.width, h = img.height
-          if (w > MAX_W) { h = Math.round((h * MAX_W) / w); w = MAX_W }
-          const canvas = document.createElement('canvas')
-          canvas.width = w; canvas.height = h
-          const ctx = canvas.getContext('2d')!
-          ctx.drawImage(img, 0, 0, w, h)
-          resolve(canvas.toDataURL('image/jpeg', 0.82))
-        }
-        img.onerror = reject
-        img.src = ev.target?.result as string
-      }
-      reader.onerror = reject
-      reader.readAsDataURL(file)
-    })
-
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files ?? [])
     if (!files.length) return
@@ -120,14 +99,28 @@ export default function AdminProduitsPage() {
     try {
       const urls: string[] = []
       for (const file of files.slice(0, remaining)) {
-        if (!file.type.startsWith('image/')) { showMsg('Format non supporté. Utilisez JPG, PNG ou WebP.', 'err'); continue }
-        if (file.size > 15 * 1024 * 1024) { showMsg('Fichier trop volumineux (max 15 Mo).', 'err'); continue }
-        const b64 = await compressImage(file)
-        urls.push(b64)
+        if (!file.type.startsWith('image/')) {
+          showMsg('Format non supporté. Utilisez JPG, PNG ou WebP.', 'err')
+          continue
+        }
+        if (file.size > 15 * 1024 * 1024) {
+          showMsg('Fichier trop volumineux (max 15 Mo).', 'err')
+          continue
+        }
+
+        try {
+          urls.push(await uploadCompressedImage(file, 'produits'))
+        } catch (err) {
+          showMsg(err instanceof Error ? err.message : 'Impossible de téléverser l\'image.', 'err')
+        }
       }
-      if (urls.length > 0) setForm(f => ({ ...f, images: [...f.images, ...urls].slice(0, 4) }))
-    } catch {
-      showMsg("Erreur lors du chargement des images.", 'err')
+
+      if (urls.length > 0) {
+        setForm(f => ({ ...f, images: [...f.images, ...urls].slice(0, 4) }))
+      }
+    } catch (error) {
+      showMsg('Erreur lors du chargement des images.', 'err')
+      console.error(error)
     }
     setUploading(false)
     if (fileRef.current) fileRef.current.value = ''
