@@ -1,8 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { put } from '@vercel/blob'
+import { mkdir, writeFile } from 'fs/promises'
+import { join } from 'path'
 import { verifyToken, SESSION_COOKIE } from '@/lib/jwt'
 
 export const runtime = 'nodejs'
+
+/** Sans BLOB_READ_WRITE_TOKEN (dev local sans store Blob branché), on écrit sur le disque local. */
+async function uploadLocal(file: File, filename: string): Promise<string> {
+  const dest = join(process.cwd(), 'public', 'uploads', filename)
+  await mkdir(join(dest, '..'), { recursive: true })
+  await writeFile(dest, Buffer.from(await file.arrayBuffer()))
+  return `/uploads/${filename}`
+}
 
 async function requireAdmin(req: NextRequest) {
   const token = req.cookies.get(SESSION_COOKIE)?.value
@@ -26,6 +36,11 @@ export async function POST(req: NextRequest) {
     const folder = formData.get('folder')?.toString() || 'produits'
     const ext = file.type === 'image/png' ? 'png' : file.type === 'image/webp' ? 'webp' : 'jpg'
     const filename = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`
+
+    if (!process.env.BLOB_READ_WRITE_TOKEN) {
+      const url = await uploadLocal(file, filename)
+      return NextResponse.json({ url })
+    }
 
     const blob = await put(filename, file, {
       access: 'public',
