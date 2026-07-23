@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { loadStripe } from '@stripe/stripe-js'
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js'
@@ -68,6 +68,8 @@ const FormulaireCarteStripe: React.FC<{ onSuccess: () => void; montantXOF: numbe
   )
 }
 
+interface CompteConnecte { prenom: string; nom: string; email: string | null; telephone: string | null }
+
 export const PaiementClient: React.FC = () => {
   const { items, totalPrice, clearCart } = useCartStore()
   const [methode, setMethode] = useState<MethodePaiement>('carte')
@@ -77,26 +79,63 @@ export const PaiementClient: React.FC = () => {
   const [prenom, setPrenom] = useState('')
   const [nom, setNom] = useState('')
   const [telephone, setTelephone] = useState('')
+  const [adresseLivraison, setAdresseLivraison] = useState('')
+  const [reference, setReference] = useState('')
+  const [compteConnecte, setCompteConnecte] = useState<CompteConnecte | null>(null)
 
   const montantXOF = totalPrice > 0 ? totalPrice : 45000
   const WAVE_URL = process.env.NEXT_PUBLIC_WAVE_MERCHANT_URL ?? null
   const ORANGE_URL = process.env.NEXT_PUBLIC_ORANGE_MERCHANT_URL ?? null
   const PAYPAL_URL = process.env.NEXT_PUBLIC_PAYPAL_MERCHANT_URL ?? null
 
+  // Si le client est déjà connecté, on récupère ses infos pour ne plus jamais les redemander.
+  useEffect(() => {
+    fetch('/api/auth/me')
+      .then(r => r.ok ? r.json() : { user: null })
+      .then(data => {
+        if (data.user) {
+          setCompteConnecte(data.user)
+          setPrenom(data.user.prenom)
+          setNom(data.user.nom)
+          setTelephone(data.user.telephone ?? '')
+        }
+      })
+      .catch(() => {})
+  }, [])
+
   const creerCompteAuto = async () => {
-    if (!prenom || !telephone) return
+    if (compteConnecte || !prenom || !telephone) return
     const pwd = `WOG-${telephone.replace(/\s/g, '').slice(-6)}${Date.now().toString().slice(-3)}`
-    setTempPassword(pwd)
     try {
-      await fetch('/api/auth/register', {
+      const res = await fetch('/api/auth/register', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ prenom, nom: nom || prenom, telephone, motDePasse: pwd }),
       })
-    } catch { /* silencieux si compte existant */ }
+      if (res.ok) setTempPassword(pwd)
+    } catch { /* compte déjà existant, ou réseau indisponible : la commande se crée quand même */ }
+  }
+
+  const creerCommande = async () => {
+    try {
+      const res = await fetch('/api/commandes', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          items: items.map(item => ({
+            produitId: item.product.id, taille: item.selectedSize.label, quantite: item.quantity,
+          })),
+          methodePaiement: methode,
+          adresseLivraison,
+          prenom, nom, telephone,
+        }),
+      })
+      const data = await res.json().catch(() => ({}))
+      if (res.ok && data.commande?.reference) setReference(data.commande.reference)
+    } catch { /* la commande peut échouer sans bloquer la confirmation client */ }
   }
 
   const handleSuccess = async () => {
     await creerCompteAuto()
+    await creerCommande()
     clearCart()
     setSuccess(true)
   }
@@ -118,9 +157,12 @@ export const PaiementClient: React.FC = () => {
           </svg>
         </div>
         <h1 className="text-2xl font-black uppercase tracking-tight text-end-black mb-2">Commande confirmée</h1>
-        <p className="text-sm text-end-gray-mid mb-4 max-w-sm">
+        <p className="text-sm text-end-gray-mid mb-1 max-w-sm">
           Paiement de <span className="font-bold text-end-black">{montantXOF.toLocaleString('fr-FR')} XOF</span> traité avec succès.
         </p>
+        {reference && (
+          <p className="text-xs text-end-gray-mid mb-4">Référence commande : <span className="font-mono font-semibold text-end-black">{reference}</span></p>
+        )}
         {tempPassword && (
           <div className="bg-blue-50 border border-blue-200 rounded p-4 mb-6 max-w-sm text-left">
             <p className="text-xs font-bold text-end-blue mb-1 uppercase tracking-wider">Compte créé automatiquement</p>
@@ -156,10 +198,21 @@ export const PaiementClient: React.FC = () => {
               {/* Infos client */}
               <div className="mb-8">
                 <h2 className="text-base font-black uppercase tracking-tight text-end-black mb-4">Vos informations</h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {compteConnecte && (
+                  <div className="flex items-center gap-3 mb-4 p-3 bg-blue-50 border border-blue-200">
+                    <div className="w-9 h-9 rounded-full bg-end-blue text-white text-xs font-bold flex items-center justify-center flex-shrink-0">
+                      {compteConnecte.prenom[0]}{compteConnecte.nom[0]}
+                    </div>
+                    <p className="text-xs text-end-gray-dark">
+                      Connecté en tant que <span className="font-semibold text-end-black">{compteConnecte.prenom} {compteConnecte.nom}</span>
+                      {compteConnecte.telephone && ` · ${compteConnecte.telephone}`}
+                    </p>
+                  </div>
+                )}
+                <div className={`grid grid-cols-1 sm:grid-cols-2 gap-4 ${compteConnecte ? 'hidden' : ''}`}>
                   <div>
                     <label className="block text-xs font-semibold uppercase tracking-wider text-end-black mb-2">Prénom *</label>
-                    <input type="text" value={prenom} onChange={e => setPrenom(e.target.value)} placeholder="Kofi" required
+                    <input type="text" value={prenom} onChange={e => setPrenom(e.target.value)} placeholder="Kofi" required={!compteConnecte}
                       className="w-full border border-end-gray-border px-4 py-3 text-sm focus:outline-none focus:border-end-blue transition-colors" />
                   </div>
                   <div>
@@ -169,9 +222,17 @@ export const PaiementClient: React.FC = () => {
                   </div>
                   <div className="sm:col-span-2">
                     <label className="block text-xs font-semibold uppercase tracking-wider text-end-black mb-2">Téléphone *</label>
-                    <input type="tel" value={telephone} onChange={e => setTelephone(e.target.value)} placeholder="05 85 49 48 48" required
+                    <input type="tel" value={telephone} onChange={e => setTelephone(e.target.value)} placeholder="05 85 49 48 48" required={!compteConnecte}
                       className="w-full border border-end-gray-border px-4 py-3 text-sm focus:outline-none focus:border-end-blue transition-colors" />
                     <p className="text-xs text-end-gray-mid mt-1">Un compte sera créé automatiquement après votre achat.</p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+                  <div className="sm:col-span-2">
+                    <label className="block text-xs font-semibold uppercase tracking-wider text-end-black mb-2">Adresse de livraison *</label>
+                    <textarea value={adresseLivraison} onChange={e => setAdresseLivraison(e.target.value)} required rows={3}
+                      placeholder="Quartier, rue, indications (ex: Cocody Angré, Rue des Jardins, villa 12...)"
+                      className="w-full border border-end-gray-border px-4 py-3 text-sm focus:outline-none focus:border-end-blue transition-colors resize-none" />
                   </div>
                 </div>
               </div>
@@ -211,7 +272,7 @@ export const PaiementClient: React.FC = () => {
                     </a>
                   ) : (
                     <form onSubmit={handleMobilePay}>
-                      <button type="submit" disabled={loading || !telephone} className={methodBtn('#1DA9FF')} style={{ background: '#1DA9FF' }}>
+                      <button type="submit" disabled={loading || !telephone || !adresseLivraison} className={methodBtn('#1DA9FF')} style={{ background: '#1DA9FF' }}>
                         {loading ? 'Traitement...' : `Confirmer — ${montantXOF.toLocaleString('fr-FR')} XOF`}
                       </button>
                     </form>
@@ -229,7 +290,7 @@ export const PaiementClient: React.FC = () => {
                     </a>
                   ) : (
                     <form onSubmit={handleMobilePay}>
-                      <button type="submit" disabled={loading || !telephone} className={methodBtn('#FF6600')} style={{ background: '#FF6600' }}>
+                      <button type="submit" disabled={loading || !telephone || !adresseLivraison} className={methodBtn('#FF6600')} style={{ background: '#FF6600' }}>
                         {loading ? 'Traitement...' : `Confirmer — ${montantXOF.toLocaleString('fr-FR')} XOF`}
                       </button>
                     </form>
@@ -240,7 +301,7 @@ export const PaiementClient: React.FC = () => {
               {methode === 'mtn' && (
                 <form onSubmit={handleMobilePay} className="space-y-4">
                   <p className="text-xs text-end-gray-dark p-4 bg-yellow-50 border-l-4 border-[#FFCC00]"><strong>MTN Mobile Money</strong> — Confirmez depuis votre menu MTN.</p>
-                  <button type="submit" disabled={loading || !telephone} style={{ background: '#FFCC00' }}
+                  <button type="submit" disabled={loading || !telephone || !adresseLivraison} style={{ background: '#FFCC00' }}
                     className="w-full py-4 text-xs font-bold uppercase tracking-widest text-black hover:opacity-80 disabled:opacity-50 transition-opacity">
                     {loading ? 'Traitement...' : `Confirmer — ${montantXOF.toLocaleString('fr-FR')} XOF`}
                   </button>

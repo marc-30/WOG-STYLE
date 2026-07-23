@@ -64,6 +64,13 @@ DB_PORT=3306
 JWT_SECRET="votre-secret-jwt"
 ADMIN_SETUP_KEY="wog-admin-setup-2026"
 
+# Upload images produits/collections — sans cette clé, écriture locale dans public/uploads/
+BLOB_READ_WRITE_TOKEN=
+
+# Email de notification de commande (resend.com/api-keys)
+RESEND_API_KEY=
+ADMIN_NOTIFICATION_EMAIL=contact@wog-style.com
+
 # Stripe (optionnel — paiement carte désactivé si absent)
 # STRIPE_SECRET_KEY=sk_test_...
 # NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_...
@@ -201,28 +208,50 @@ Statuts commande : `EN_ATTENTE` → `PAYE` → `EN_PREPARATION` → `EXPEDIE` �
 
 ---
 
-## Hébergement LWS
+## Hébergement LWS (cPanel — app + base sur le même serveur)
 
-```bash
-# 1. Exporter la base locale
-mysqldump -u root -p wog_database > backup.sql
+L'app et la base tournent toutes les deux sur LWS (offre cPanel XL/XL2 ou supérieure —
+Node.js géré via Passenger, versions disponibles jusqu'à v24). Aucune connexion MySQL
+distante n'est nécessaire : `DB_HOST=localhost` fonctionne comme en local, puisque
+l'app Node.js et MySQL sont sur le même serveur.
 
-# 2. Importer sur LWS (phpMyAdmin ou SSH)
-mysql -u user_lws -p nom_base_lws < backup.sql
+### 1. Base de données (cPanel → MySQL® Databases)
 
-# 3. Configurer .env en production
-DB_HOST=mysql.lws.fr   # ou l'hôte fourni par LWS
-DB_USER=user_lws
-DB_PASSWORD=...
-DB_NAME=nom_base_lws
-DB_PORT=3306
+1. Créer une base + un utilisateur MySQL (cPanel préfixe avec le login : `monlogin_wog`)
+2. Ajouter l'utilisateur à la base avec **toutes les permissions**
+3. cPanel → **phpMyAdmin** → sélectionner la base → onglet **SQL** → coller le contenu
+   de `schema.sql` → **Exécuter**
 
-# 4. Builder et démarrer
-npm run build
-npm run start  # ou configurer PM2
-```
+### 2. Déployer le code (cPanel → Software → Setup Node.js App)
 
-> Les images produits sont dans `/public/images/` — les uploader via FTP.
+1. **Create Application** :
+   - Version Node.js : 20.x ou plus récente
+   - Application root : ex. `wog-app` (⚠️ **hors** de `public_html`, contrairement au PHP)
+   - Application startup file : `server.js` (fourni à la racine du projet, wrapper
+     Next.js compatible Passenger — ne pas utiliser `next start` directement)
+   - Application URL : le domaine ou sous-domaine cible
+2. Déposer le code dans le dossier "Application root" — soit via **Git Version Control**
+   (cPanel peut cloner directement le repo GitHub `marc-30/WOG-STYLE`), soit par upload
+   manuel/FTP
+3. Dans l'interface Setup Node.js App, remplir les **variables d'environnement** (mêmes
+   clés que `.env.local`, avec `DB_HOST=localhost` et les identifiants MySQL créés à
+   l'étape 1)
+4. Cliquer **Run NPM Install**, puis lancer le build :
+   ```bash
+   # Depuis le terminal SSH cPanel, dans le dossier de l'app
+   npm run build
+   ```
+5. Cliquer **Restart** pour démarrer l'application
+
+### 3. Images
+
+`BLOB_READ_WRITE_TOKEN` peut rester vide en prod LWS — l'upload écrit alors directement
+dans `public/uploads/` sur le serveur (voir `src/app/api/admin/upload/route.ts`), ce qui
+est le comportement voulu ici puisque l'app et le stockage sont sur la même machine.
+
+Sources :
+- [Comment déployer une application Node.js sur cPanel | LWS](https://aide.lws.fr/base/cPanel/Logiciels-et-programmation/Comment-utiliser-une-application-Nodejs-sur-un-hebergement-cPanel)
+- [Node.js v24 sur cPanel LWS : guide de déploiement complet](https://tutoriels.lws.fr/divers/nodejs-cpanel)
 
 ---
 

@@ -15,15 +15,16 @@ export async function GET(req: NextRequest) {
   const admin = await requireAdmin(req)
   if (!admin) return NextResponse.json({ error: 'Non autorisé.' }, { status: 401 })
   const { searchParams } = new URL(req.url)
-  const limit = parseInt(searchParams.get('limit') ?? '10')
+  const limit = Math.min(Math.max(parseInt(searchParams.get('limit') ?? '10') || 10, 1), 500)
   try {
+    // LIMIT en paramètre préparé échoue avec mysql2 (ER_WRONG_ARGUMENTS) — interpolation
+    // sûre ici car `limit` est un entier borné ci-dessus, jamais une valeur brute de l'utilisateur.
     const [commandes] = await pool.execute<RowDataPacket[]>(
       `SELECT c.*, u.prenom, u.nom, u.email
        FROM commandes c
        JOIN utilisateurs u ON u.id = c.utilisateurId
        ORDER BY c.createdAt DESC
-       LIMIT ?`,
-      [limit]
+       LIMIT ${limit}`
     )
     const [lignes] = await pool.execute<RowDataPacket[]>(
       `SELECT cl.*, p.nom AS produitNom, pi.url AS produitImage
