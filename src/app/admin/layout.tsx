@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 import { SidebarProvider, useSidebar } from './_components/SidebarContext'
 import { ThemeProvider } from './_components/ThemeContext'
 import AdminSidebar from './_components/AdminSidebar'
@@ -34,9 +34,12 @@ const AdminContent: React.FC<{ children: React.ReactNode }> = ({ children }) => 
 
 function AdminAuthGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter()
+  const pathname = usePathname()
+  const isSetupPage = pathname === '/admin/setup'
   const [checked, setChecked] = useState(false)
 
   useEffect(() => {
+    if (isSetupPage) return
     fetch('/api/auth/me')
       .then(r => r.json())
       .then(data => {
@@ -44,7 +47,10 @@ function AdminAuthGuard({ children }: { children: React.ReactNode }) {
         else setChecked(true)
       })
       .catch(() => router.replace('/connexion'))
-  }, [router])
+  }, [router, isSetupPage])
+
+  // /admin/setup doit rester accessible sans compte existant (création du tout premier admin).
+  if (isSetupPage) return <>{children}</>
 
   if (!checked) {
     return (
