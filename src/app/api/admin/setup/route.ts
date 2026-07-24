@@ -9,7 +9,10 @@ export async function POST(req: NextRequest) {
   try {
     const { prenom, nom, email, telephone, motDePasse, setupKey } = await req.json()
 
-    const SETUP_KEY = process.env.ADMIN_SETUP_KEY ?? 'wog-admin-setup-2026'
+    const SETUP_KEY = process.env.ADMIN_SETUP_KEY
+    if (!SETUP_KEY) {
+      return NextResponse.json({ error: 'Configuration serveur manquante (ADMIN_SETUP_KEY).' }, { status: 503 })
+    }
     if (setupKey !== SETUP_KEY) {
       return NextResponse.json({ error: 'Clé de configuration incorrecte.' }, { status: 403 })
     }
