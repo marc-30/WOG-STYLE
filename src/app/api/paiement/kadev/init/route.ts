@@ -1,8 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { SESSION_COOKIE } from '@/lib/jwt'
-import { sendOrderNotificationEmail } from '@/lib/email'
 import { creerCommande, CommandeError, type ItemInput } from '@/lib/commandes'
 
+/**
+ * Crée une commande EN_ATTENTE avec le montant réel calculé côté serveur
+ * (jamais celui envoyé par le client) et sans décrémenter le stock — le
+ * stock n'est réservé qu'à la confirmation réelle du paiement (webhook).
+ * Le front utilise le `montantTotal` retourné ici, et lui seul, pour ouvrir
+ * le SDK KadevPay.
+ */
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
@@ -12,20 +18,10 @@ export async function POST(req: NextRequest) {
     }
 
     const result = await creerCommande({
-      items, methodePaiement, adresseLivraison, prenom, nom, telephone, email,
-      statut: 'PAYE',
-      decrementerStock: true,
+      items, methodePaiement: methodePaiement || 'kadevpay', adresseLivraison, prenom, nom, telephone, email,
+      statut: 'EN_ATTENTE',
+      decrementerStock: false,
       sessionToken: req.cookies.get(SESSION_COOKIE)?.value,
-    })
-
-    await sendOrderNotificationEmail({
-      reference: result.reference,
-      createdAt: new Date(),
-      client: result.utilisateur,
-      lignes: result.lignes.map(l => ({ produitNom: l.produitNom, taille: l.taille, quantite: l.quantite, prixUnitaire: l.prixUnitaire })),
-      montantTotal: result.montantTotal,
-      methodePaiement,
-      adresseLivraison: adresseLivraison ?? null,
     })
 
     const response = NextResponse.json(
@@ -43,7 +39,7 @@ export async function POST(req: NextRequest) {
     if (error instanceof CommandeError) {
       return NextResponse.json({ error: error.message }, { status: error.status })
     }
-    console.error('[POST /api/commandes]', error)
-    return NextResponse.json({ error: 'Erreur serveur lors de la création de la commande.' }, { status: 500 })
+    console.error('[POST /api/paiement/kadev/init]', error)
+    return NextResponse.json({ error: 'Erreur serveur lors de l\'initiation du paiement.' }, { status: 500 })
   }
 }

@@ -2,12 +2,32 @@
 
 import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
+import Script from 'next/script'
 import { loadStripe } from '@stripe/stripe-js'
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js'
 import { useCartStore } from '@/store/cartStore'
 
+declare global {
+  interface Window {
+    KadevPay?: {
+      checkout: (options: {
+        public_key: string
+        amount: number
+        email?: string
+        name?: string
+        phone?: string
+        method: 'momo' | 'card'
+        callback_url: string
+        metadata?: Record<string, string>
+        onSuccess?: () => void
+        onClose?: () => void
+      }) => void
+    }
+  }
+}
+
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY ?? '')
-type MethodePaiement = 'carte' | 'wave' | 'orange' | 'mtn' | 'paypal'
+type MethodePaiement = 'carte' | 'wave' | 'orange' | 'mtn' | 'paypal' | 'kadevpay'
 
 const FormulaireCarteStripe: React.FC<{ onSuccess: () => void; montantXOF: number }> = ({ onSuccess, montantXOF }) => {
   const stripe = useStripe()
@@ -82,6 +102,8 @@ export const PaiementClient: React.FC = () => {
   const [adresseLivraison, setAdresseLivraison] = useState('')
   const [reference, setReference] = useState('')
   const [compteConnecte, setCompteConnecte] = useState<CompteConnecte | null>(null)
+  const [email, setEmail] = useState('')
+  const [kadevError, setKadevError] = useState('')
 
   const montantXOF = totalPrice > 0 ? totalPrice : 45000
   const WAVE_URL = process.env.NEXT_PUBLIC_WAVE_MERCHANT_URL ?? null
@@ -98,6 +120,7 @@ export const PaiementClient: React.FC = () => {
           setPrenom(data.user.prenom)
           setNom(data.user.nom)
           setTelephone(data.user.telephone ?? '')
+          setEmail(data.user.email ?? '')
         }
       })
       .catch(() => {})
@@ -148,6 +171,53 @@ export const PaiementClient: React.FC = () => {
     await handleSuccess()
   }
 
+  const handleKadevPay = async (methodeKadev: 'momo' | 'card') => {
+    setKadevError('')
+    if (!window.KadevPay) { setKadevError('Le module de paiement est encore en chargement, réessaie dans un instant.'); return }
+    setLoading(true)
+    try {
+      await creerCompteAuto()
+      // Le serveur recalcule le montant réel du panier — jamais une valeur du navigateur.
+      const res = await fetch('/api/paiement/kadev/init', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          items: items.map(item => ({
+            produitId: item.product.id, taille: item.selectedSize.label, quantite: item.quantity,
+          })),
+          methodePaiement: 'kadevpay',
+          adresseLivraison, prenom, nom, telephone, email,
+        }),
+      })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok || !data.commande) {
+        setKadevError(data.error || 'Impossible d\'initier le paiement.')
+        setLoading(false)
+        return
+      }
+
+      const { reference: commandeReference, montantTotal: montantServeur } = data.commande
+
+      window.KadevPay.checkout({
+        public_key: process.env.NEXT_PUBLIC_KADEVPAY_PUBLIC_KEY ?? '',
+        amount: montantServeur,
+        email, name: `${prenom} ${nom}`.trim(), phone: telephone,
+        method: methodeKadev,
+        callback_url: typeof window !== 'undefined' ? window.location.origin + '/paiement' : '',
+        metadata: { commandeReference },
+        onSuccess: () => {
+          clearCart()
+          setReference(commandeReference)
+          setSuccess(true)
+          setLoading(false)
+        },
+        onClose: () => setLoading(false),
+      })
+    } catch {
+      setKadevError('Erreur réseau. Réessaie.')
+      setLoading(false)
+    }
+  }
+
   if (success) {
     return (
       <div className="min-h-screen bg-end-white flex flex-col items-center justify-center px-4 text-center">
@@ -183,6 +253,7 @@ export const PaiementClient: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-end-gray-light">
+      <Script src="https://pay.kadev.ci/js/v1/kadev-pay.js" strategy="lazyOnload" />
       <div className="max-w-screen-lg mx-auto px-4 py-6 sm:py-10">
         <nav className="flex items-center gap-2 text-xs text-end-gray-mid mb-6">
           <Link href="/" className="hover:text-end-black transition-colors">Accueil</Link>
@@ -247,6 +318,7 @@ export const PaiementClient: React.FC = () => {
                   { id: 'orange', label: 'Orange Money', sublabel: 'Mobile Money' },
                   { id: 'mtn', label: 'MTN Money', sublabel: 'Mobile Money' },
                   { id: 'paypal', label: 'PayPal', sublabel: 'International' },
+                  { id: 'kadevpay', label: 'KadevPay', sublabel: 'Momo · Carte' },
                 ] as { id: MethodePaiement; label: string; sublabel: string }[]).map(m => (
                   <button key={m.id} type="button" onClick={() => setMethode(m.id)}
                     className={`flex items-center justify-between sm:flex-col sm:items-center sm:justify-center gap-2 px-4 py-3 sm:p-3 border-2 text-xs transition-all ${methode === m.id ? 'border-end-blue bg-blue-50' : 'border-end-gray-border hover:border-end-gray-mid'}`}>
@@ -321,6 +393,35 @@ export const PaiementClient: React.FC = () => {
                       Nous contacter pour PayPal
                     </Link>
                   )}
+                </div>
+              )}
+
+              {methode === 'kadevpay' && (
+                <div className="space-y-4">
+                  <p className="text-xs text-end-gray-dark p-4 bg-emerald-50 border-l-4 border-emerald-500">
+                    <strong>KadevPay</strong> — Mobile Money ou carte bancaire, paiement sécurisé.
+                  </p>
+                  <div>
+                    <label className="block text-xs font-semibold uppercase tracking-wider text-end-black mb-2">Email *</label>
+                    <input type="email" value={email} onChange={e => setEmail(e.target.value)} required
+                      placeholder="toi@exemple.com"
+                      className="w-full border border-end-gray-border px-4 py-3 text-sm focus:outline-none focus:border-end-blue transition-colors" />
+                  </div>
+                  {kadevError && <p className="text-xs text-red-600 bg-red-50 border border-red-200 p-3">{kadevError}</p>}
+                  <div className="grid grid-cols-2 gap-3">
+                    <button type="button" onClick={() => handleKadevPay('momo')}
+                      disabled={loading || !telephone || !adresseLivraison || !email}
+                      className="py-4 text-xs font-bold uppercase tracking-widest text-white hover:opacity-80 disabled:opacity-50 transition-opacity"
+                      style={{ background: '#059669' }}>
+                      {loading ? 'Traitement...' : 'Mobile Money'}
+                    </button>
+                    <button type="button" onClick={() => handleKadevPay('card')}
+                      disabled={loading || !telephone || !adresseLivraison || !email}
+                      className="py-4 text-xs font-bold uppercase tracking-widest text-white hover:opacity-80 disabled:opacity-50 transition-opacity"
+                      style={{ background: '#047857' }}>
+                      {loading ? 'Traitement...' : 'Carte bancaire'}
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
