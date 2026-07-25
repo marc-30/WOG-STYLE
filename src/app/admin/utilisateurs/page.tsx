@@ -73,8 +73,9 @@ export default function UtilisateursPage() {
   const handleDelete = async (id: string) => {
     if (!confirm('Supprimer définitivement cet utilisateur ?')) return
     const res = await fetch(`/api/admin/utilisateurs/${id}`, { method: 'DELETE' })
+    const data = await res.json().catch(() => ({}))
     if (res.ok) { showMsg('Utilisateur supprimé.'); fetchUsers() }
-    else showMsg('Erreur de suppression.', 'err')
+    else showMsg(data.error || 'Erreur de suppression.', 'err')
   }
 
   const admins = users.filter(u => u.role === 'ADMIN')

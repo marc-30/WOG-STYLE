@@ -55,6 +55,15 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
   try {
     const [existing] = await pool.execute<RowDataPacket[]>('SELECT id FROM utilisateurs WHERE id=? LIMIT 1', [id])
     if (!existing[0]) return NextResponse.json({ error: 'Utilisateur introuvable.' }, { status: 404 })
+    const [[{ nbCommandes }]] = await pool.execute<RowDataPacket[]>(
+      'SELECT COUNT(*) AS nbCommandes FROM commandes WHERE utilisateurId=?', [id]
+    )
+    if (nbCommandes > 0) {
+      return NextResponse.json(
+        { error: `Impossible de supprimer : ce client a ${nbCommandes} commande(s) enregistrée(s). Désactivez plutôt son compte.` },
+        { status: 409 }
+      )
+    }
     await pool.execute('DELETE FROM utilisateurs WHERE id=?', [id])
     return NextResponse.json({ message: 'Utilisateur supprimé.' })
   } catch (error) {
