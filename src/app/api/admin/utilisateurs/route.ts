@@ -1,17 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import bcrypt from 'bcryptjs'
 import { RowDataPacket } from 'mysql2'
-import { verifyToken, SESSION_COOKIE } from '@/lib/jwt'
+import { requireAdmin, requireSuperAdmin } from '@/lib/auth'
 import pool from '@/lib/db'
 import { randomUUID } from 'crypto'
-
-async function requireAdmin(req: NextRequest) {
-  const token = req.cookies.get(SESSION_COOKIE)?.value
-  if (!token) return null
-  const payload = verifyToken(token)
-  if (!payload || payload.role !== 'ADMIN') return null
-  return payload
-}
 
 export async function GET(req: NextRequest) {
   const admin = await requireAdmin(req)
@@ -38,7 +30,7 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  const admin = await requireAdmin(req)
+  const admin = await requireSuperAdmin(req)
   if (!admin) return NextResponse.json({ error: 'Non autorisé.' }, { status: 401 })
   try {
     const { prenom, nom, email, telephone, motDePasse, role } = await req.json()

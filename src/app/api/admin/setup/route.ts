@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
 
     let user: RowDataPacket
     if (existing[0]) {
-      await pool.execute('UPDATE utilisateurs SET role=?, actif=1 WHERE id=?', ['ADMIN', existing[0].id])
+      await pool.execute('UPDATE utilisateurs SET role=?, actif=1 WHERE id=?', ['SUPER_ADMIN', existing[0].id])
       const [rows] = await pool.execute<RowDataPacket[]>('SELECT * FROM utilisateurs WHERE id=?', [existing[0].id])
       user = rows[0]
     } else {
@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
       const id = randomUUID()
       await pool.execute(
         'INSERT INTO utilisateurs (id, prenom, nom, email, telephone, motDePasse, role, actif) VALUES (?, ?, ?, ?, ?, ?, ?, 1)',
-        [id, prenom.trim(), nom.trim(), email ? email.toLowerCase().trim() : null, telephone ? telephone.trim() : null, hash, 'ADMIN']
+        [id, prenom.trim(), nom.trim(), email ? email.toLowerCase().trim() : null, telephone ? telephone.trim() : null, hash, 'SUPER_ADMIN']
       )
       const [rows] = await pool.execute<RowDataPacket[]>('SELECT * FROM utilisateurs WHERE id=?', [id])
       user = rows[0]
@@ -50,12 +50,12 @@ export async function POST(req: NextRequest) {
 
     const token = signToken({
       id: user.id, prenom: user.prenom, nom: user.nom,
-      email: user.email ?? undefined, telephone: user.telephone ?? undefined, role: 'ADMIN',
+      email: user.email ?? undefined, telephone: user.telephone ?? undefined, role: 'SUPER_ADMIN',
     })
 
     const response = NextResponse.json({
-      message: `Compte admin configuré pour ${user.prenom} ${user.nom}.`,
-      user: { id: user.id, prenom: user.prenom, nom: user.nom, role: 'ADMIN' },
+      message: `Compte admin principal configuré pour ${user.prenom} ${user.nom}.`,
+      user: { id: user.id, prenom: user.prenom, nom: user.nom, role: 'SUPER_ADMIN' },
     })
     response.cookies.set(SESSION_COOKIE, token, {
       httpOnly: true, secure: process.env.NODE_ENV === 'production',

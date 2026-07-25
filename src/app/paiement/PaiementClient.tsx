@@ -3,8 +3,6 @@
 import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Script from 'next/script'
-import { loadStripe } from '@stripe/stripe-js'
-import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js'
 import { useCartStore } from '@/store/cartStore'
 
 declare global {
@@ -26,73 +24,10 @@ declare global {
   }
 }
 
-const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY ?? '')
-type MethodePaiement = 'carte' | 'wave' | 'orange' | 'mtn' | 'paypal' | 'kadevpay'
-
-const FormulaireCarteStripe: React.FC<{ onSuccess: () => void; montantXOF: number }> = ({ onSuccess, montantXOF }) => {
-  const stripe = useStripe()
-  const elements = useElements()
-  const [loading, setLoading] = useState(false)
-  const [erreur, setErreur] = useState<string | null>(null)
-  const [titulaire, setTitulaire] = useState('')
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!stripe || !elements) return
-    setLoading(true); setErreur(null)
-    try {
-      const res = await fetch('/api/paiement/intent', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ montant: montantXOF, devise: 'xof' }),
-      })
-      if (!res.ok) { await new Promise(r => setTimeout(r, 1500)); onSuccess(); return }
-      const { clientSecret, error: apiError } = await res.json()
-      if (apiError || !clientSecret) { await new Promise(r => setTimeout(r, 1500)); onSuccess(); return }
-      const cardElement = elements.getElement(CardElement)
-      if (!cardElement) return
-      const { error: stripeError } = await stripe.confirmCardPayment(clientSecret, {
-        payment_method: { card: cardElement, billing_details: { name: titulaire } },
-      })
-      if (stripeError) setErreur(stripeError.message ?? 'Paiement refusé')
-      else onSuccess()
-    } catch { await new Promise(r => setTimeout(r, 1500)); onSuccess() }
-    finally { setLoading(false) }
-  }
-
-  return (
-    <form onSubmit={handleSubmit} className="space-y-5">
-      <div>
-        <label className="block text-xs font-semibold uppercase tracking-wider text-end-black mb-2">Nom du titulaire</label>
-        <input type="text" value={titulaire} onChange={e => setTitulaire(e.target.value.toUpperCase())}
-          placeholder="JEAN DUPONT" required autoComplete="cc-name"
-          className="w-full border border-end-gray-border px-4 py-3 text-sm focus:outline-none focus:border-end-blue transition-colors uppercase" />
-      </div>
-      <div>
-        <label className="block text-xs font-semibold uppercase tracking-wider text-end-black mb-2">Informations de carte</label>
-        <div className="border border-end-gray-border px-4 py-3.5 focus-within:border-end-blue transition-colors">
-          <CardElement options={{
-            style: { base: { fontSize: '14px', fontFamily: 'Inter, sans-serif', color: '#111111', '::placeholder': { color: '#9B9B9B' } }, invalid: { color: '#e53935' } },
-            hidePostalCode: true,
-          }} />
-        </div>
-      </div>
-      <p className="text-xs text-end-gray-mid bg-end-gray-light border border-end-gray-border p-3 rounded">
-        Test : <span className="font-mono">4242 4242 4242 4242</span> — date future — CVV quelconque
-      </p>
-      {erreur && <p className="text-xs text-red-600 bg-red-50 border border-red-200 p-3">{erreur}</p>}
-      <button type="submit" disabled={loading || !stripe}
-        className="w-full bg-end-blue text-white py-4 text-xs font-bold uppercase tracking-widest hover:opacity-80 transition-opacity disabled:opacity-50 flex items-center justify-center gap-3">
-        {loading ? 'Traitement...' : `Payer ${montantXOF.toLocaleString('fr-FR')} XOF`}
-      </button>
-    </form>
-  )
-}
-
 interface CompteConnecte { prenom: string; nom: string; email: string | null; telephone: string | null }
 
 export const PaiementClient: React.FC = () => {
   const { items, totalPrice, clearCart } = useCartStore()
-  const [methode, setMethode] = useState<MethodePaiement>('carte')
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
   const [tempPassword, setTempPassword] = useState('')
@@ -106,9 +41,6 @@ export const PaiementClient: React.FC = () => {
   const [kadevError, setKadevError] = useState('')
 
   const montantXOF = totalPrice > 0 ? totalPrice : 45000
-  const WAVE_URL = process.env.NEXT_PUBLIC_WAVE_MERCHANT_URL ?? null
-  const ORANGE_URL = process.env.NEXT_PUBLIC_ORANGE_MERCHANT_URL ?? null
-  const PAYPAL_URL = process.env.NEXT_PUBLIC_PAYPAL_MERCHANT_URL ?? null
 
   // Si le client est déjà connecté, on récupère ses infos pour ne plus jamais les redemander.
   useEffect(() => {
@@ -136,39 +68,6 @@ export const PaiementClient: React.FC = () => {
       })
       if (res.ok) setTempPassword(pwd)
     } catch { /* compte déjà existant, ou réseau indisponible : la commande se crée quand même */ }
-  }
-
-  const creerCommande = async () => {
-    try {
-      const res = await fetch('/api/commandes', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          items: items.map(item => ({
-            produitId: item.product.id, taille: item.selectedSize.label, quantite: item.quantity,
-          })),
-          methodePaiement: methode,
-          adresseLivraison,
-          prenom, nom, telephone,
-        }),
-      })
-      const data = await res.json().catch(() => ({}))
-      if (res.ok && data.commande?.reference) setReference(data.commande.reference)
-    } catch { /* la commande peut échouer sans bloquer la confirmation client */ }
-  }
-
-  const handleSuccess = async () => {
-    await creerCompteAuto()
-    await creerCommande()
-    clearCart()
-    setSuccess(true)
-  }
-
-  const handleMobilePay = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
-    await new Promise(r => setTimeout(r, 2000))
-    setLoading(false)
-    await handleSuccess()
   }
 
   const handleKadevPay = async (methodeKadev: 'momo' | 'card') => {
@@ -248,9 +147,6 @@ export const PaiementClient: React.FC = () => {
     )
   }
 
-  const methodBtn = (color: string) =>
-    `flex items-center justify-center w-full py-4 text-xs font-bold uppercase tracking-widest text-white hover:opacity-90 disabled:opacity-50 transition-opacity`
-
   return (
     <div className="min-h-screen bg-end-gray-light">
       <Script src="https://pay.kadev.ci/js/v1/kadev-pay.js" strategy="lazyOnload" />
@@ -308,122 +204,34 @@ export const PaiementClient: React.FC = () => {
                 </div>
               </div>
 
-              <h1 className="text-xl font-black uppercase tracking-tight text-end-black mb-6">Méthode de paiement</h1>
+              <h1 className="text-xl font-black uppercase tracking-tight text-end-black mb-6">Paiement</h1>
 
-              {/* Sélecteur méthode */}
-              <div className="flex flex-col sm:grid sm:grid-cols-3 gap-2 mb-8">
-                {([
-                  { id: 'carte', label: 'Carte bancaire', sublabel: 'Visa · Mastercard' },
-                  { id: 'wave', label: 'Wave', sublabel: 'Instantané' },
-                  { id: 'orange', label: 'Orange Money', sublabel: 'Mobile Money' },
-                  { id: 'mtn', label: 'MTN Money', sublabel: 'Mobile Money' },
-                  { id: 'paypal', label: 'PayPal', sublabel: 'International' },
-                  { id: 'kadevpay', label: 'KadevPay', sublabel: 'Momo · Carte' },
-                ] as { id: MethodePaiement; label: string; sublabel: string }[]).map(m => (
-                  <button key={m.id} type="button" onClick={() => setMethode(m.id)}
-                    className={`flex items-center justify-between sm:flex-col sm:items-center sm:justify-center gap-2 px-4 py-3 sm:p-3 border-2 text-xs transition-all ${methode === m.id ? 'border-end-blue bg-blue-50' : 'border-end-gray-border hover:border-end-gray-mid'}`}>
-                    <span className="font-semibold text-end-black">{m.label}</span>
-                    <span className="text-[10px] text-end-gray-mid">{m.sublabel}</span>
+              <div className="space-y-4">
+                <p className="text-xs text-end-gray-dark p-4 bg-emerald-50 border-l-4 border-emerald-500">
+                  <strong>KadevPay</strong> — Mobile Money ou carte bancaire, paiement sécurisé.
+                </p>
+                <div>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-end-black mb-2">Email *</label>
+                  <input type="email" value={email} onChange={e => setEmail(e.target.value)} required
+                    placeholder="toi@exemple.com"
+                    className="w-full border border-end-gray-border px-4 py-3 text-sm focus:outline-none focus:border-end-blue transition-colors" />
+                </div>
+                {kadevError && <p className="text-xs text-red-600 bg-red-50 border border-red-200 p-3">{kadevError}</p>}
+                <div className="grid grid-cols-2 gap-3">
+                  <button type="button" onClick={() => handleKadevPay('momo')}
+                    disabled={loading || !telephone || !adresseLivraison || !email}
+                    className="py-4 text-xs font-bold uppercase tracking-widest text-white hover:opacity-80 disabled:opacity-50 transition-opacity"
+                    style={{ background: '#059669' }}>
+                    {loading ? 'Traitement...' : 'Mobile Money'}
                   </button>
-                ))}
+                  <button type="button" onClick={() => handleKadevPay('card')}
+                    disabled={loading || !telephone || !adresseLivraison || !email}
+                    className="py-4 text-xs font-bold uppercase tracking-widest text-white hover:opacity-80 disabled:opacity-50 transition-opacity"
+                    style={{ background: '#047857' }}>
+                    {loading ? 'Traitement...' : 'Carte bancaire'}
+                  </button>
+                </div>
               </div>
-
-              {methode === 'carte' && (
-                <Elements stripe={stripePromise}>
-                  <FormulaireCarteStripe onSuccess={handleSuccess} montantXOF={montantXOF} />
-                </Elements>
-              )}
-
-              {methode === 'wave' && (
-                <div className="space-y-4">
-                  <p className="text-xs text-end-gray-dark p-4 bg-blue-50 border-l-4 border-[#1DA9FF]"><strong>Wave CI</strong> — Paiement instantané.</p>
-                  {WAVE_URL ? (
-                    <a href={`${WAVE_URL}?amount=${montantXOF}`} target="_blank" rel="noopener noreferrer"
-                      className={methodBtn('#1DA9FF')} style={{ background: '#1DA9FF' }}>
-                      Payer {montantXOF.toLocaleString('fr-FR')} XOF avec Wave
-                    </a>
-                  ) : (
-                    <form onSubmit={handleMobilePay}>
-                      <button type="submit" disabled={loading || !telephone || !adresseLivraison} className={methodBtn('#1DA9FF')} style={{ background: '#1DA9FF' }}>
-                        {loading ? 'Traitement...' : `Confirmer — ${montantXOF.toLocaleString('fr-FR')} XOF`}
-                      </button>
-                    </form>
-                  )}
-                </div>
-              )}
-
-              {methode === 'orange' && (
-                <div className="space-y-4">
-                  <p className="text-xs text-end-gray-dark p-4 bg-orange-50 border-l-4 border-[#FF6600]"><strong>Orange Money CI</strong> — Paiement sécurisé.</p>
-                  {ORANGE_URL ? (
-                    <a href={ORANGE_URL} target="_blank" rel="noopener noreferrer"
-                      className={methodBtn('#FF6600')} style={{ background: '#FF6600' }}>
-                      Payer {montantXOF.toLocaleString('fr-FR')} XOF
-                    </a>
-                  ) : (
-                    <form onSubmit={handleMobilePay}>
-                      <button type="submit" disabled={loading || !telephone || !adresseLivraison} className={methodBtn('#FF6600')} style={{ background: '#FF6600' }}>
-                        {loading ? 'Traitement...' : `Confirmer — ${montantXOF.toLocaleString('fr-FR')} XOF`}
-                      </button>
-                    </form>
-                  )}
-                </div>
-              )}
-
-              {methode === 'mtn' && (
-                <form onSubmit={handleMobilePay} className="space-y-4">
-                  <p className="text-xs text-end-gray-dark p-4 bg-yellow-50 border-l-4 border-[#FFCC00]"><strong>MTN Mobile Money</strong> — Confirmez depuis votre menu MTN.</p>
-                  <button type="submit" disabled={loading || !telephone || !adresseLivraison} style={{ background: '#FFCC00' }}
-                    className="w-full py-4 text-xs font-bold uppercase tracking-widest text-black hover:opacity-80 disabled:opacity-50 transition-opacity">
-                    {loading ? 'Traitement...' : `Confirmer — ${montantXOF.toLocaleString('fr-FR')} XOF`}
-                  </button>
-                </form>
-              )}
-
-              {methode === 'paypal' && (
-                <div className="space-y-4">
-                  <p className="text-xs text-end-gray-dark p-4 bg-blue-50 border-l-4 border-[#003087]"><strong>PayPal</strong> — Paiement international sécurisé.</p>
-                  {PAYPAL_URL ? (
-                    <a href={PAYPAL_URL} target="_blank" rel="noopener noreferrer"
-                      className={methodBtn('#003087')} style={{ background: '#003087' }}>
-                      Payer via PayPal
-                    </a>
-                  ) : (
-                    <Link href="/contact" className={methodBtn('#003087')} style={{ background: '#003087' }}>
-                      Nous contacter pour PayPal
-                    </Link>
-                  )}
-                </div>
-              )}
-
-              {methode === 'kadevpay' && (
-                <div className="space-y-4">
-                  <p className="text-xs text-end-gray-dark p-4 bg-emerald-50 border-l-4 border-emerald-500">
-                    <strong>KadevPay</strong> — Mobile Money ou carte bancaire, paiement sécurisé.
-                  </p>
-                  <div>
-                    <label className="block text-xs font-semibold uppercase tracking-wider text-end-black mb-2">Email *</label>
-                    <input type="email" value={email} onChange={e => setEmail(e.target.value)} required
-                      placeholder="toi@exemple.com"
-                      className="w-full border border-end-gray-border px-4 py-3 text-sm focus:outline-none focus:border-end-blue transition-colors" />
-                  </div>
-                  {kadevError && <p className="text-xs text-red-600 bg-red-50 border border-red-200 p-3">{kadevError}</p>}
-                  <div className="grid grid-cols-2 gap-3">
-                    <button type="button" onClick={() => handleKadevPay('momo')}
-                      disabled={loading || !telephone || !adresseLivraison || !email}
-                      className="py-4 text-xs font-bold uppercase tracking-widest text-white hover:opacity-80 disabled:opacity-50 transition-opacity"
-                      style={{ background: '#059669' }}>
-                      {loading ? 'Traitement...' : 'Mobile Money'}
-                    </button>
-                    <button type="button" onClick={() => handleKadevPay('card')}
-                      disabled={loading || !telephone || !adresseLivraison || !email}
-                      className="py-4 text-xs font-bold uppercase tracking-widest text-white hover:opacity-80 disabled:opacity-50 transition-opacity"
-                      style={{ background: '#047857' }}>
-                      {loading ? 'Traitement...' : 'Carte bancaire'}
-                    </button>
-                  </div>
-                </div>
-              )}
             </div>
           </div>
 

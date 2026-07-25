@@ -18,7 +18,7 @@ export interface JwtPayload {
   nom: string
   email?: string
   telephone?: string
-  role: 'CLIENT' | 'ADMIN'
+  role: 'CLIENT' | 'ADMIN' | 'SUPER_ADMIN'
 }
 
 /** Crée un JWT valide 7 jours */

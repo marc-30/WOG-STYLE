@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { put } from '@vercel/blob'
 import { mkdir, writeFile } from 'fs/promises'
 import { join } from 'path'
-import { verifyToken, SESSION_COOKIE } from '@/lib/jwt'
+import { requireAdmin } from '@/lib/auth'
 
 export const runtime = 'nodejs'
 
@@ -12,14 +12,6 @@ async function uploadLocal(file: File, filename: string): Promise<string> {
   await mkdir(join(dest, '..'), { recursive: true })
   await writeFile(dest, Buffer.from(await file.arrayBuffer()))
   return `/uploads/${filename}`
-}
-
-async function requireAdmin(req: NextRequest) {
-  const token = req.cookies.get(SESSION_COOKIE)?.value
-  if (!token) return null
-  const payload = verifyToken(token)
-  if (!payload || payload.role !== 'ADMIN') return null
-  return payload
 }
 
 export async function POST(req: NextRequest) {

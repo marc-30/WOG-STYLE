@@ -1,19 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import bcrypt from 'bcryptjs'
 import { RowDataPacket } from 'mysql2'
-import { verifyToken, SESSION_COOKIE } from '@/lib/jwt'
+import { requireSuperAdmin } from '@/lib/auth'
 import pool from '@/lib/db'
 
-async function requireAdmin(req: NextRequest) {
-  const token = req.cookies.get(SESSION_COOKIE)?.value
-  if (!token) return null
-  const payload = verifyToken(token)
-  if (!payload || payload.role !== 'ADMIN') return null
-  return payload
-}
-
 export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
-  const admin = await requireAdmin(req)
+  const admin = await requireSuperAdmin(req)
   if (!admin) return NextResponse.json({ error: 'Non autorisé.' }, { status: 401 })
   const { id } = params
   try {
@@ -48,7 +40,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
 }
 
 export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
-  const admin = await requireAdmin(req)
+  const admin = await requireSuperAdmin(req)
   if (!admin) return NextResponse.json({ error: 'Non autorisé.' }, { status: 401 })
   const { id } = params
   if (id === admin.id) return NextResponse.json({ error: 'Vous ne pouvez pas supprimer votre propre compte.' }, { status: 403 })

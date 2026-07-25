@@ -1,17 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import bcrypt from 'bcryptjs'
 import { RowDataPacket } from 'mysql2'
-import { verifyToken, SESSION_COOKIE } from '@/lib/jwt'
+import { requireAdmin } from '@/lib/auth'
 import pool from '@/lib/db'
 import { randomUUID } from 'crypto'
-
-async function requireAdmin(req: NextRequest) {
-  const token = req.cookies.get(SESSION_COOKIE)?.value
-  if (!token) return null
-  const payload = verifyToken(token)
-  if (!payload || payload.role !== 'ADMIN') return null
-  return payload
-}
 
 const COLLECTIONS = [
   {
@@ -183,11 +175,11 @@ export async function POST(req: NextRequest) {
     let adminId: string
     if (existAdmin[0]) {
       adminId = existAdmin[0].id
-      await pool.execute("UPDATE utilisateurs SET motDePasse=?, role='ADMIN', actif=1 WHERE id=?", [adminHash, adminId])
+      await pool.execute("UPDATE utilisateurs SET motDePasse=?, role='SUPER_ADMIN', actif=1 WHERE id=?", [adminHash, adminId])
     } else {
       adminId = randomUUID()
       await pool.execute(
-        "INSERT INTO utilisateurs (id, prenom, nom, email, motDePasse, role, actif) VALUES (?, 'Admin', 'WOG', 'admin@wog-style.com', ?, 'ADMIN', 1)",
+        "INSERT INTO utilisateurs (id, prenom, nom, email, motDePasse, role, actif) VALUES (?, 'Admin', 'WOG', 'admin@wog-style.com', ?, 'SUPER_ADMIN', 1)",
         [adminId, adminHash]
       )
     }

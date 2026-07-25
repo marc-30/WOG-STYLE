@@ -11,8 +11,6 @@
   },
   "dependencies": {
     "@headlessui/react": "^2.1.2",
-    "@stripe/react-stripe-js": "^6.1.0",
-    "@stripe/stripe-js": "^9.0.1",
     "@tanstack/react-query": "^5.51.1",
     "@types/bcryptjs": "^2.4.6",
     "@types/jsonwebtoken": "^9.0.10",
@@ -27,7 +25,6 @@
     "react-apexcharts": "^2.1.0",
     "react-dom": "^18.3.1",
     "resend": "^6.18.0",
-    "stripe": "^22.0.0",
     "zustand": "^4.5.4"
   },
   "devDependencies": {

@@ -1,15 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { RowDataPacket } from 'mysql2'
-import { verifyToken, SESSION_COOKIE } from '@/lib/jwt'
+import { requireAdmin } from '@/lib/auth'
 import pool from '@/lib/db'
-
-async function requireAdmin(req: NextRequest) {
-  const token = req.cookies.get(SESSION_COOKIE)?.value
-  if (!token) return null
-  const payload = verifyToken(token)
-  if (!payload || payload.role !== 'ADMIN') return null
-  return payload
-}
 
 export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   const admin = await requireAdmin(req)

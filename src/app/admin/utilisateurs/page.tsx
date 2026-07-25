@@ -5,7 +5,7 @@ import { Table, TableBody, TableCell, TableHeader, TableRow } from '../_componen
 
 interface User {
   id: string; prenom: string; nom: string; email: string | null
-  telephone: string | null; role: 'CLIENT' | 'ADMIN'; actif: boolean; createdAt: string
+  telephone: string | null; role: 'CLIENT' | 'ADMIN' | 'SUPER_ADMIN'; actif: boolean; createdAt: string
   _count?: { commandes: number }
 }
 
@@ -19,6 +19,7 @@ export default function UtilisateursPage() {
   const [showEdit, setShowEdit] = useState(false)
   const [msg, setMsg] = useState('')
   const [msgType, setMsgType] = useState<'ok' | 'err'>('ok')
+  const [isPrincipal, setIsPrincipal] = useState(false)
 
   // Formulaire création
   const [form, setForm] = useState({ prenom: '', nom: '', email: '', telephone: '', motDePasse: '', role: 'CLIENT' as 'CLIENT' | 'ADMIN' })
@@ -32,7 +33,10 @@ export default function UtilisateursPage() {
     setLoading(false)
   }
 
-  useEffect(() => { fetchUsers() }, [])
+  useEffect(() => {
+    fetchUsers()
+    fetch('/api/auth/me').then(r => r.ok ? r.json() : null).then(d => setIsPrincipal(d?.user?.role === 'SUPER_ADMIN')).catch(() => {})
+  }, [])
 
   const showMsg = (text: string, type: 'ok' | 'err' = 'ok') => {
     setMsg(text); setMsgType(type)
@@ -78,7 +82,7 @@ export default function UtilisateursPage() {
     else showMsg(data.error || 'Erreur de suppression.', 'err')
   }
 
-  const admins = users.filter(u => u.role === 'ADMIN')
+  const admins = users.filter(u => u.role === 'ADMIN' || u.role === 'SUPER_ADMIN')
   const clients = users.filter(u => u.role === 'CLIENT')
 
   return (
@@ -91,13 +95,21 @@ export default function UtilisateursPage() {
             {admins.length} admin{admins.length > 1 ? 's' : ''} · {clients.length} client{clients.length > 1 ? 's' : ''}
           </p>
         </div>
-        <button onClick={() => setTab('creer')}
-          className="inline-flex items-center gap-1.5 rounded-xl bg-brand-500 px-3.5 py-2 text-xs font-semibold text-white hover:bg-brand-600 transition-colors shadow-sm">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 5v14M5 12h14"/></svg>
-          <span className="hidden sm:inline">Nouvel utilisateur</span>
-          <span className="sm:hidden">Nouveau</span>
-        </button>
+        {isPrincipal && (
+          <button onClick={() => setTab('creer')}
+            className="inline-flex items-center gap-1.5 rounded-xl bg-brand-500 px-3.5 py-2 text-xs font-semibold text-white hover:bg-brand-600 transition-colors shadow-sm">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 5v14M5 12h14"/></svg>
+            <span className="hidden sm:inline">Nouvel utilisateur</span>
+            <span className="sm:hidden">Nouveau</span>
+          </button>
+        )}
       </div>
+
+      {!isPrincipal && (
+        <div className="rounded-xl px-4 py-3 text-theme-sm font-medium bg-gray-50 text-gray-500 dark:bg-white/[0.03] dark:text-gray-400">
+          Accès en lecture seule — seul l'administrateur principal peut créer, modifier ou supprimer des comptes.
+        </div>
+      )}
 
       {/* Message */}
       {msg && (
@@ -107,14 +119,16 @@ export default function UtilisateursPage() {
       )}
 
       {/* Tabs */}
-      <div className="flex border-b border-gray-200 dark:border-gray-800">
-        {(['liste', 'creer'] as Tab[]).map(t => (
-          <button key={t} onClick={() => setTab(t)}
-            className={`pb-3 px-4 text-theme-sm font-medium border-b-2 transition-colors ${tab === t ? 'border-brand-500 text-brand-600 dark:text-brand-400' : 'border-transparent text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white/90'}`}>
-            {t === 'liste' ? 'Liste des utilisateurs' : 'Créer un utilisateur'}
-          </button>
-        ))}
-      </div>
+      {isPrincipal && (
+        <div className="flex border-b border-gray-200 dark:border-gray-800">
+          {(['liste', 'creer'] as Tab[]).map(t => (
+            <button key={t} onClick={() => setTab(t)}
+              className={`pb-3 px-4 text-theme-sm font-medium border-b-2 transition-colors ${tab === t ? 'border-brand-500 text-brand-600 dark:text-brand-400' : 'border-transparent text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white/90'}`}>
+              {t === 'liste' ? 'Liste des utilisateurs' : 'Créer un utilisateur'}
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* ── Liste ── */}
       {tab === 'liste' && (
@@ -147,7 +161,7 @@ export default function UtilisateursPage() {
                         </p>
                       </div>
                       <div className="flex items-center gap-1.5 flex-shrink-0 mt-0.5">
-                        <Badge size="sm" color={u.role === 'ADMIN' ? 'primary' : 'light'}>
+                        <Badge size="sm" color={(u.role === 'ADMIN' || u.role === 'SUPER_ADMIN') ? 'primary' : 'light'}>
                           {u.role}
                         </Badge>
                         <Badge size="sm" color={u.actif ? 'success' : 'error'}>
@@ -168,20 +182,22 @@ export default function UtilisateursPage() {
                         {' · '}
                         {new Date(u.createdAt).toLocaleDateString('fr-FR')}
                       </span>
-                      <div className="flex items-center gap-3">
-                        <button
-                          onClick={() => { setEditUser({ ...u }); setShowEdit(true) }}
-                          className="text-xs font-medium text-brand-500 dark:text-brand-400"
-                        >
-                          Modifier
-                        </button>
-                        <button
-                          onClick={() => handleDelete(u.id)}
-                          className="text-xs font-medium text-red-400 dark:text-red-400"
-                        >
-                          Supprimer
-                        </button>
-                      </div>
+                      {isPrincipal && (
+                        <div className="flex items-center gap-3">
+                          <button
+                            onClick={() => { setEditUser({ ...u }); setShowEdit(true) }}
+                            className="text-xs font-medium text-brand-500 dark:text-brand-400"
+                          >
+                            Modifier
+                          </button>
+                          <button
+                            onClick={() => handleDelete(u.id)}
+                            className="text-xs font-medium text-red-400 dark:text-red-400"
+                          >
+                            Supprimer
+                          </button>
+                        </div>
+                      )}
                     </div>
                   </div>
                 ))}
@@ -202,7 +218,7 @@ export default function UtilisateursPage() {
                 <Table>
                   <TableHeader className="border-gray-100 dark:border-gray-800 border-y bg-gray-50 dark:bg-white/[0.02]">
                     <TableRow>
-                      {['Utilisateur', 'Contact', 'Rôle', 'Statut', 'Commandes', 'Inscription', 'Actions'].map(h => (
+                      {(isPrincipal ? ['Utilisateur', 'Contact', 'Rôle', 'Statut', 'Commandes', 'Inscription', 'Actions'] : ['Utilisateur', 'Contact', 'Rôle', 'Statut', 'Commandes', 'Inscription']).map(h => (
                         <TableCell key={h} isHeader className="px-4 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">{h}</TableCell>
                       ))}
                     </TableRow>
@@ -212,7 +228,7 @@ export default function UtilisateursPage() {
                       <TableRow key={u.id} className="hover:bg-gray-50 dark:hover:bg-white/[0.02] transition-colors">
                         <TableCell className="px-4 py-3">
                           <div className="flex items-center gap-3">
-                            <div className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold text-white flex-shrink-0 ${u.role === 'ADMIN' ? 'bg-brand-500' : 'bg-gray-400 dark:bg-gray-600'}`}>
+                            <div className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold text-white flex-shrink-0 ${(u.role === 'ADMIN' || u.role === 'SUPER_ADMIN') ? 'bg-brand-500' : 'bg-gray-400 dark:bg-gray-600'}`}>
                               {u.prenom[0]}{u.nom[0]}
                             </div>
                             <div>
@@ -226,7 +242,7 @@ export default function UtilisateursPage() {
                           <p className="text-theme-xs text-gray-400 dark:text-gray-500">{u.telephone || '—'}</p>
                         </TableCell>
                         <TableCell className="px-4 py-3">
-                          <Badge size="sm" color={u.role === 'ADMIN' ? 'primary' : 'light'}>{u.role}</Badge>
+                          <Badge size="sm" color={(u.role === 'ADMIN' || u.role === 'SUPER_ADMIN') ? 'primary' : 'light'}>{u.role}</Badge>
                         </TableCell>
                         <TableCell className="px-4 py-3">
                           <Badge size="sm" color={u.actif ? 'success' : 'error'}>{u.actif ? 'Actif' : 'Inactif'}</Badge>
@@ -235,19 +251,21 @@ export default function UtilisateursPage() {
                         <TableCell className="px-4 py-3 text-theme-xs text-gray-400 dark:text-gray-500">
                           {new Date(u.createdAt).toLocaleDateString('fr-FR')}
                         </TableCell>
-                        <TableCell className="px-4 py-3">
-                          <div className="flex items-center gap-2">
-                            <button onClick={() => { setEditUser({ ...u }); setShowEdit(true) }}
-                              className="text-theme-xs text-brand-500 hover:text-brand-700 font-medium dark:text-brand-400">
-                              Modifier
-                            </button>
-                            <span className="text-gray-200 dark:text-gray-700">|</span>
-                            <button onClick={() => handleDelete(u.id)}
-                              className="text-theme-xs text-error-500 hover:text-error-700 font-medium dark:text-error-400">
-                              Supprimer
-                            </button>
-                          </div>
-                        </TableCell>
+                        {isPrincipal && (
+                          <TableCell className="px-4 py-3">
+                            <div className="flex items-center gap-2">
+                              <button onClick={() => { setEditUser({ ...u }); setShowEdit(true) }}
+                                className="text-theme-xs text-brand-500 hover:text-brand-700 font-medium dark:text-brand-400">
+                                Modifier
+                              </button>
+                              <span className="text-gray-200 dark:text-gray-700">|</span>
+                              <button onClick={() => handleDelete(u.id)}
+                                className="text-theme-xs text-error-500 hover:text-error-700 font-medium dark:text-error-400">
+                                Supprimer
+                              </button>
+                            </div>
+                          </TableCell>
+                        )}
                       </TableRow>
                     ))}
                   </TableBody>
@@ -259,7 +277,7 @@ export default function UtilisateursPage() {
       )}
 
       {/* ── Créer ── */}
-      {tab === 'creer' && (
+      {tab === 'creer' && isPrincipal && (
         <div className="max-w-lg">
           <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03] p-6">
             <h2 className="text-base font-semibold text-gray-800 dark:text-white/90 mb-5">Créer un utilisateur</h2>
@@ -315,7 +333,7 @@ export default function UtilisateursPage() {
       )}
 
       {/* Modal modification */}
-      {showEdit && editUser && (
+      {showEdit && editUser && isPrincipal && (
         <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/40 p-4">
           <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl p-6 w-full max-w-md border border-gray-200 dark:border-gray-800">
             <h4 className="text-base font-semibold text-gray-800 dark:text-white/90 mb-4">Modifier l'utilisateur</h4>
