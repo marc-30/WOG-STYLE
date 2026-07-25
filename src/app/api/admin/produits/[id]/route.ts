@@ -82,6 +82,15 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
   if (!admin) return NextResponse.json({ error: 'Non autorisé.' }, { status: 401 })
 
   try {
+    const [[{ nbLignes }]] = await pool.execute<RowDataPacket[]>(
+      'SELECT COUNT(*) AS nbLignes FROM commande_lignes WHERE produitId=?', [params.id]
+    )
+    if (nbLignes > 0) {
+      return NextResponse.json(
+        { error: `Impossible de supprimer : ce produit apparaît dans ${nbLignes} commande(s). Désactivez-le plutôt.` },
+        { status: 409 }
+      )
+    }
     await pool.execute('DELETE FROM produits WHERE id=?', [params.id])
     return NextResponse.json({ message: 'Produit supprimé.' })
   } catch (error) {

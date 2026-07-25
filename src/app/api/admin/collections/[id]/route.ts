@@ -31,10 +31,18 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     const { nom, tagline, description, imageUrl, heroImage, hoverImage, actif } = await req.json()
     if (!nom) return NextResponse.json({ error: 'Nom requis.' }, { status: 400 })
     const slug = nom.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
-    await pool.execute(
-      'UPDATE collections SET slug=?, nom=?, tagline=?, description=?, imageUrl=?, heroImage=?, hoverImage=?, actif=? WHERE id=?',
-      [slug, nom, tagline ?? null, description ?? null, imageUrl ?? null, heroImage ?? null, hoverImage ?? null, actif !== false ? 1 : 0, params.id]
-    )
+
+    const fields: string[] = ['slug=?', 'nom=?']
+    const vals: (string | number | null)[] = [slug, nom]
+    if (tagline !== undefined) { fields.push('tagline=?'); vals.push(tagline ?? null) }
+    if (description !== undefined) { fields.push('description=?'); vals.push(description ?? null) }
+    if (imageUrl !== undefined) { fields.push('imageUrl=?'); vals.push(imageUrl ?? null) }
+    if (heroImage !== undefined) { fields.push('heroImage=?'); vals.push(heroImage ?? null) }
+    if (hoverImage !== undefined) { fields.push('hoverImage=?'); vals.push(hoverImage ?? null) }
+    if (actif !== undefined) { fields.push('actif=?'); vals.push(actif !== false ? 1 : 0) }
+    vals.push(params.id)
+    await pool.execute(`UPDATE collections SET ${fields.join(', ')} WHERE id=?`, vals)
+
     const [rows] = await pool.execute<RowDataPacket[]>('SELECT * FROM collections WHERE id = ?', [params.id])
     if (!rows[0]) return NextResponse.json({ error: 'Collection introuvable.' }, { status: 404 })
     return NextResponse.json({ collection: rows[0] })

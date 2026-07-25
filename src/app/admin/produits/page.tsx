@@ -173,8 +173,9 @@ export default function AdminProduitsPage() {
   const handleDelete = async (id: string) => {
     if (!confirm('Supprimer définitivement ce produit ? Cette action est irréversible.')) return
     const res = await fetch(`/api/admin/produits/${id}`, { method: 'DELETE' })
+    const data = await res.json().catch(() => ({}))
     if (res.ok) { showMsg('Produit supprimé.'); fetchProduits() }
-    else showMsg('Erreur de suppression.', 'err')
+    else showMsg(data.error || 'Erreur de suppression.', 'err')
   }
 
   const handleSeed = async (force = false) => {
