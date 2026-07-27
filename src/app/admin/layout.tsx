@@ -43,7 +43,7 @@ function AdminAuthGuard({ children }: { children: React.ReactNode }) {
     fetch('/api/auth/me')
       .then(r => r.json())
       .then(data => {
-        if (!data.user || data.user.role !== 'ADMIN') router.replace('/connexion')
+        if (!data.user || (data.user.role !== 'ADMIN' && data.user.role !== 'SUPER_ADMIN')) router.replace('/connexion')
         else setChecked(true)
       })
       .catch(() => router.replace('/connexion'))

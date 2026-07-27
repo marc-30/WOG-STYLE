@@ -49,8 +49,9 @@ export const ConnexionClient: React.FC = () => {
 
           if (res.ok) {
             const data = await res.json()
-            saveAuthUser({ id: data.user.id, prenom: data.user.prenom, nom: data.user.nom, role: data.user.role.toLowerCase() as 'admin' | 'client' })
-            router.push(data.user.role === 'ADMIN' ? '/admin' : '/profil')
+            const estAdmin = data.user.role === 'ADMIN' || data.user.role === 'SUPER_ADMIN'
+            saveAuthUser({ id: data.user.id, prenom: data.user.prenom, nom: data.user.nom, role: estAdmin ? 'admin' : 'client' })
+            router.push(estAdmin ? '/admin' : '/profil')
             return
           }
 

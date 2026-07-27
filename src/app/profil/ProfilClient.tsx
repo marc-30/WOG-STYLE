@@ -17,7 +17,7 @@ interface UserProfile {
   nom: string
   email: string | null
   telephone: string | null
-  role: 'CLIENT' | 'ADMIN'
+  role: 'CLIENT' | 'ADMIN' | 'SUPER_ADMIN'
   createdAt: string
   _count: { commandes: number }
 }
@@ -60,6 +60,7 @@ export const ProfilClient: React.FC = () => {
 
   if (!user) return null
 
+  const estAdmin = user.role === 'ADMIN' || user.role === 'SUPER_ADMIN'
   const initiales = `${user.prenom[0]}${user.nom[0]}`.toUpperCase()
   const dateInscription = new Date(user.createdAt).toLocaleDateString('fr-FR', {
     year: 'numeric', month: 'long', day: 'numeric',
@@ -93,11 +94,11 @@ export const ProfilClient: React.FC = () => {
 
               {/* Badge rôle */}
               <span className={`inline-block text-xs font-bold uppercase tracking-widest px-3 py-1 mb-4 ${
-                user.role === 'ADMIN'
+                estAdmin
                   ? 'bg-end-black text-end-white'
                   : 'bg-end-gray-light text-end-gray-dark border border-end-gray-border'
               }`}>
-                {user.role === 'ADMIN' ? 'Administrateur' : 'Client'}
+                {user.role === 'SUPER_ADMIN' ? 'Administrateur principal' : user.role === 'ADMIN' ? 'Administrateur' : 'Client'}
               </span>
 
               <div className="space-y-2 text-xs text-end-gray-dark text-left border-t border-end-gray-border pt-4">
@@ -130,7 +131,7 @@ export const ProfilClient: React.FC = () => {
 
               {/* Actions */}
               <div className="mt-6 space-y-2">
-                {user.role === 'ADMIN' && (
+                {estAdmin && (
                   <Link href="/admin"
                     className="block w-full bg-end-black text-end-white py-2.5 text-xs font-bold uppercase tracking-widest text-center hover:opacity-80 transition-opacity">
                     Dashboard Admin
