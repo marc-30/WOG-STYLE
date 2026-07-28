@@ -10,6 +10,7 @@ import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { clearAuthUser } from '@/hooks/useAuth'
+import { useCartStore } from '@/store/cartStore'
 
 interface UserProfile {
   id: string
@@ -43,6 +44,7 @@ export const ProfilClient: React.FC = () => {
 
   const handleLogout = async () => {
     await fetch('/api/auth/logout', { method: 'POST' })
+    useCartStore.getState().clearCart()
     clearAuthUser()
     router.push('/')
   }

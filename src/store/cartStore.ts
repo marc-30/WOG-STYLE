@@ -9,8 +9,30 @@
  */
 
 import { create } from 'zustand'
-import { persist, createJSONStorage } from 'zustand/middleware'
+import { persist, createJSONStorage, type StateStorage } from 'zustand/middleware'
 import type { CartState, CartActions, CartItem, Product, ProductSize } from '@/types'
+
+/**
+ * Le panier est lié à la session utilisateur : il ne doit persister en localStorage
+ * que si un compte est connecté (marqueur `wog_auth`, posé par useAuth au login/logout).
+ * Un visiteur non connecté repart donc du panier vide à chaque ouverture du site.
+ */
+const AUTH_KEY = 'wog_auth'
+
+const sessionScopedStorage: StateStorage = {
+  getItem: (name) => {
+    if (typeof window === 'undefined' || !window.localStorage.getItem(AUTH_KEY)) return null
+    return window.localStorage.getItem(name)
+  },
+  setItem: (name, value) => {
+    if (typeof window === 'undefined' || !window.localStorage.getItem(AUTH_KEY)) return
+    window.localStorage.setItem(name, value)
+  },
+  removeItem: (name) => {
+    if (typeof window === 'undefined') return
+    window.localStorage.removeItem(name)
+  },
+}
 
 /* ============================================================
  * TYPE COMPLET DU STORE
@@ -210,7 +232,7 @@ export const useCartStore = create<CartStore>()(
      */
     {
       name: 'end-clothing-cart',
-      storage: createJSONStorage(() => localStorage),
+      storage: createJSONStorage(() => sessionScopedStorage),
       /* Sélection des champs à persister (exclusion de isOpen) */
       partialize: (state) => ({
         items: state.items,

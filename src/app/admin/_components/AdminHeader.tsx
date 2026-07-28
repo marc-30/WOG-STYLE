@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useSidebar } from './SidebarContext'
 import { useTheme } from './ThemeContext'
 import { clearAuthUser } from '@/hooks/useAuth'
+import { useCartStore } from '@/store/cartStore'
 
 interface AdminUser { prenom: string; nom: string; email: string | null; role: string }
 interface CommandeNotif {
@@ -124,6 +125,7 @@ const AdminHeader: React.FC = () => {
 
   const handleLogout = async () => {
     await fetch('/api/auth/logout', { method: 'POST' })
+    useCartStore.getState().clearCart()
     clearAuthUser()
     router.push('/connexion')
   }
