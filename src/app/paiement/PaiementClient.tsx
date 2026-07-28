@@ -187,14 +187,14 @@ export const PaiementClient: React.FC = () => {
                     <input type="text" value={nom} onChange={e => setNom(e.target.value)} placeholder="Asante"
                       className="w-full border border-end-gray-border px-4 py-3 text-sm focus:outline-none focus:border-end-blue transition-colors" />
                   </div>
-                  <div className="sm:col-span-2">
-                    <label className="block text-xs font-semibold uppercase tracking-wider text-end-black mb-2">Téléphone *</label>
-                    <input type="tel" value={telephone} onChange={e => setTelephone(e.target.value)} placeholder="05 85 49 48 48" required={!compteConnecte}
-                      className="w-full border border-end-gray-border px-4 py-3 text-sm focus:outline-none focus:border-end-blue transition-colors" />
-                    <p className="text-xs text-end-gray-mid mt-1">Un compte sera créé automatiquement après votre achat.</p>
-                  </div>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+                  <div className="sm:col-span-2">
+                    <label className="block text-xs font-semibold uppercase tracking-wider text-end-black mb-2">Téléphone *</label>
+                    <input type="tel" value={telephone} onChange={e => setTelephone(e.target.value)} placeholder="05 85 49 48 48" required
+                      className="w-full border border-end-gray-border px-4 py-3 text-sm focus:outline-none focus:border-end-blue transition-colors" />
+                    {!compteConnecte && <p className="text-xs text-end-gray-mid mt-1">Un compte sera créé automatiquement après votre achat.</p>}
+                  </div>
                   <div className="sm:col-span-2">
                     <label className="block text-xs font-semibold uppercase tracking-wider text-end-black mb-2">Adresse de livraison *</label>
                     <textarea value={adresseLivraison} onChange={e => setAdresseLivraison(e.target.value)} required rows={3}
