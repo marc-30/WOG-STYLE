@@ -33,6 +33,10 @@ export interface CreerCommandeResult {
   utilisateur: { id: string; prenom: string; nom: string; telephone: string | null; email: string | null }
   /** Nouveau token de session à poser en cookie, si un compte a été créé/retrouvé sans session existante. */
   nouveauToken: string | null
+  /** Vrai si un tout nouveau compte a été créé pour cette commande (achat sans connexion, aucun compte existant). */
+  compteCree: boolean
+  /** Mot de passe temporaire en clair du compte créé — uniquement pour l'email de bienvenue, jamais stocké. */
+  motDePasseTemp: string | null
 }
 
 export class CommandeError extends Error {
@@ -73,6 +77,8 @@ export async function creerCommande(params: CreerCommandeParams): Promise<CreerC
   }
 
   let nouveauToken: string | null = null
+  let compteCree = false
+  let motDePasseTemp: string | null = null
 
   if (!utilisateurId) {
     if (!telephone && !email) {
@@ -89,12 +95,14 @@ export async function creerCommande(params: CreerCommandeParams): Promise<CreerC
       utilisateurId = existing[0].id
     } else {
       if (!prenom) throw new CommandeError('Prénom requis.', 400)
-      const hash = await bcrypt.hash(randomUUID(), 12)
+      motDePasseTemp = `WOG-${randomUUID().slice(0, 8).toUpperCase()}`
+      const hash = await bcrypt.hash(motDePasseTemp, 12)
       utilisateurId = randomUUID()
       await pool.execute(
         `INSERT INTO utilisateurs (id, prenom, nom, email, telephone, motDePasse, role, actif) VALUES (?, ?, ?, ?, ?, ?, 'CLIENT', 1)`,
         [utilisateurId, prenom.trim(), nom?.trim() || prenom.trim(), email ? email.toLowerCase().trim() : null, telephone?.trim() || null, hash]
       )
+      compteCree = true
     }
     nouveauToken = signToken({ id: utilisateurId!, prenom: prenom ?? '', nom: nom ?? '', email, telephone, role: 'CLIENT' })
   }
@@ -157,7 +165,7 @@ export async function creerCommande(params: CreerCommandeParams): Promise<CreerC
     }
   }
 
-  return { commandeId, reference, montantTotal, lignes, utilisateur, nouveauToken }
+  return { commandeId, reference, montantTotal, lignes, utilisateur, nouveauToken, compteCree, motDePasseTemp }
 }
 
 /** Décrémente le stock pour une commande déjà créée (utilisé à la confirmation webhook). */

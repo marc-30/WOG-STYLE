@@ -94,3 +94,93 @@ export async function sendOrderNotificationEmail(commande: CommandeEmailData): P
     console.error('[email] Échec envoi notification commande', error)
   }
 }
+
+/* ============================================================
+ * EMAILS CLIENT — bienvenue, confirmation de paiement, statut colis
+ * ============================================================ */
+
+/** Doit rester synchronisé avec `statutFR` dans src/app/admin/commandes/page.tsx. */
+export const STATUT_LABELS: Record<string, string> = {
+  EN_ATTENTE: 'En attente de paiement',
+  PAYE: 'Payé',
+  EN_PREPARATION: 'En préparation',
+  EXPEDIE: 'Expédié',
+  LIVRE: 'Livré',
+  ANNULE: 'Annulé',
+}
+
+export interface StatutEmailData {
+  reference: string
+  client: { prenom: string; nom: string; email: string | null }
+  statut: string
+}
+
+function buildStatutHtml(data: StatutEmailData, intro: string): string {
+  const label = STATUT_LABELS[data.statut] ?? data.statut
+  return `
+    <div style="font-family:sans-serif;max-width:600px;margin:0 auto;color:#111;">
+      <h2 style="margin-bottom:4px;">Bonjour ${data.client.prenom},</h2>
+      <p>${intro}</p>
+      <p style="color:#666;margin-top:16px;">Référence commande : <strong>${data.reference}</strong></p>
+      <p style="font-size:15px;margin-top:8px;">
+        État de votre colis :
+        <strong style="display:inline-block;margin-left:4px;padding:4px 10px;background:#f5f5f5;border-radius:4px;">${label}</strong>
+      </p>
+      <p style="color:#999;font-size:12px;margin-top:24px;">WOG-STYLE — Merci de votre confiance.</p>
+    </div>
+  `
+}
+
+/** Envoie la confirmation de paiement au client. Ne lève jamais. */
+export async function sendConfirmationPaiementEmail(data: StatutEmailData): Promise<void> {
+  if (!data.client.email) return
+  try {
+    await getResend().emails.send({
+      from: 'WOG-STYLE <onboarding@resend.dev>',
+      to: data.client.email,
+      subject: `Paiement confirmé — commande ${data.reference}`,
+      html: buildStatutHtml(data, 'Nous avons bien reçu votre paiement, merci pour votre commande !'),
+    })
+  } catch (error) {
+    console.error('[email] Échec envoi confirmation paiement', error)
+  }
+}
+
+/** Envoie une notification de changement de statut au client. Ne lève jamais. */
+export async function sendStatutCommandeEmail(data: StatutEmailData): Promise<void> {
+  if (!data.client.email) return
+  try {
+    await getResend().emails.send({
+      from: 'WOG-STYLE <onboarding@resend.dev>',
+      to: data.client.email,
+      subject: `Mise à jour de votre commande ${data.reference}`,
+      html: buildStatutHtml(data, "Le statut de votre commande vient d'être mis à jour."),
+    })
+  } catch (error) {
+    console.error('[email] Échec envoi mise à jour statut', error)
+  }
+}
+
+/** Envoie les identifiants du compte créé automatiquement lors d'un achat sans connexion. Ne lève jamais. */
+export async function sendBienvenueCompteEmail(data: { prenom: string; email: string; motDePasseTemp: string }): Promise<void> {
+  try {
+    await getResend().emails.send({
+      from: 'WOG-STYLE <onboarding@resend.dev>',
+      to: data.email,
+      subject: 'Ton compte WOG-STYLE',
+      html: `
+        <div style="font-family:sans-serif;max-width:600px;margin:0 auto;color:#111;">
+          <h2 style="margin-bottom:4px;">Bienvenue ${data.prenom} !</h2>
+          <p>Un compte a été créé automatiquement pour toi lors de ton achat sur WOG-STYLE.</p>
+          <p style="margin-top:16px;">
+            Identifiant : <strong>${data.email}</strong><br/>
+            Mot de passe temporaire : <strong>${data.motDePasseTemp}</strong>
+          </p>
+          <p style="color:#666;font-size:13px;margin-top:12px;">Nous te recommandons de le modifier depuis ton profil après connexion.</p>
+        </div>
+      `,
+    })
+  } catch (error) {
+    console.error('[email] Échec envoi bienvenue compte', error)
+  }
+}

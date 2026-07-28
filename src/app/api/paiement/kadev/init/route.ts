@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { SESSION_COOKIE } from '@/lib/jwt'
 import { creerCommande, CommandeError, type ItemInput } from '@/lib/commandes'
+import { sendBienvenueCompteEmail } from '@/lib/email'
 
 /**
  * Crée une commande EN_ATTENTE avec le montant réel calculé côté serveur
@@ -23,6 +24,14 @@ export async function POST(req: NextRequest) {
       decrementerStock: false,
       sessionToken: req.cookies.get(SESSION_COOKIE)?.value,
     })
+
+    if (result.compteCree && result.motDePasseTemp && result.utilisateur.email) {
+      await sendBienvenueCompteEmail({
+        prenom: result.utilisateur.prenom,
+        email: result.utilisateur.email,
+        motDePasseTemp: result.motDePasseTemp,
+      })
+    }
 
     const response = NextResponse.json(
       { commande: { id: result.commandeId, reference: result.reference, montantTotal: result.montantTotal } },

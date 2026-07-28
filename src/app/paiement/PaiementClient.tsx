@@ -30,7 +30,6 @@ export const PaiementClient: React.FC = () => {
   const { items, totalPrice, clearCart } = useCartStore()
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
-  const [tempPassword, setTempPassword] = useState('')
   const [prenom, setPrenom] = useState('')
   const [nom, setNom] = useState('')
   const [telephone, setTelephone] = useState('')
@@ -58,25 +57,13 @@ export const PaiementClient: React.FC = () => {
       .catch(() => {})
   }, [])
 
-  const creerCompteAuto = async () => {
-    if (compteConnecte || !prenom || !telephone) return
-    const pwd = `WOG-${telephone.replace(/\s/g, '').slice(-6)}${Date.now().toString().slice(-3)}`
-    try {
-      const res = await fetch('/api/auth/register', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prenom, nom: nom || prenom, telephone, motDePasse: pwd }),
-      })
-      if (res.ok) setTempPassword(pwd)
-    } catch { /* compte déjà existant, ou réseau indisponible : la commande se crée quand même */ }
-  }
-
   const handleKadevPay = async (methodeKadev: 'momo' | 'card') => {
     setKadevError('')
     if (!window.KadevPay) { setKadevError('Le module de paiement est encore en chargement, réessaie dans un instant.'); return }
     setLoading(true)
     try {
-      await creerCompteAuto()
       // Le serveur recalcule le montant réel du panier — jamais une valeur du navigateur.
+      // Si le client n'a pas de compte, le serveur en crée un et lui envoie ses identifiants par email.
       const res = await fetch('/api/paiement/kadev/init', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -132,12 +119,10 @@ export const PaiementClient: React.FC = () => {
         {reference && (
           <p className="text-xs text-end-gray-mid mb-4">Référence commande : <span className="font-mono font-semibold text-end-black">{reference}</span></p>
         )}
-        {tempPassword && (
+        {!compteConnecte && (
           <div className="bg-blue-50 border border-blue-200 rounded p-4 mb-6 max-w-sm text-left">
             <p className="text-xs font-bold text-end-blue mb-1 uppercase tracking-wider">Compte créé automatiquement</p>
-            <p className="text-xs text-end-gray-dark">Identifiant : <span className="font-semibold">{telephone}</span></p>
-            <p className="text-xs text-end-gray-dark">Mot de passe temp. : <span className="font-mono font-semibold">{tempPassword}</span></p>
-            <p className="text-xs text-end-gray-mid mt-1">Modifiez-le dans votre profil.</p>
+            <p className="text-xs text-end-gray-dark">Tes identifiants de connexion t&apos;ont été envoyés par email à <span className="font-semibold">{email}</span>.</p>
           </div>
         )}
         <Link href="/" className="inline-flex items-center gap-2 bg-end-blue text-white px-8 py-4 text-xs font-bold uppercase tracking-widest hover:opacity-80 transition-opacity">

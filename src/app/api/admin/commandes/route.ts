@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { RowDataPacket } from 'mysql2'
 import { requireAdmin } from '@/lib/auth'
 import pool from '@/lib/db'
+import { sendStatutCommandeEmail } from '@/lib/email'
 
 export async function GET(req: NextRequest) {
   const admin = await requireAdmin(req)
@@ -46,8 +47,27 @@ export async function PATCH(req: NextRequest) {
   if (!admin) return NextResponse.json({ error: 'Non autorisé.' }, { status: 401 })
   try {
     const { id, statut } = await req.json()
+    const [existing] = await pool.execute<RowDataPacket[]>('SELECT statut, reference, utilisateurId FROM commandes WHERE id=?', [id])
+    if (!existing[0]) return NextResponse.json({ error: 'Commande introuvable.' }, { status: 404 })
+    const statutChange = existing[0].statut !== statut
+
     await pool.execute('UPDATE commandes SET statut=? WHERE id=?', [statut, id])
     const [rows] = await pool.execute<RowDataPacket[]>('SELECT * FROM commandes WHERE id=?', [id])
+
+    if (statutChange) {
+      const [userRows] = await pool.execute<RowDataPacket[]>(
+        'SELECT prenom, nom, email FROM utilisateurs WHERE id=?', [existing[0].utilisateurId]
+      )
+      const utilisateur = userRows[0]
+      if (utilisateur) {
+        await sendStatutCommandeEmail({
+          reference: existing[0].reference,
+          client: { prenom: utilisateur.prenom, nom: utilisateur.nom, email: utilisateur.email },
+          statut,
+        })
+      }
+    }
+
     return NextResponse.json({ commande: rows[0] })
   } catch (error) {
     console.error('[PATCH /api/admin/commandes]', error)

@@ -3,7 +3,7 @@ import { RowDataPacket } from 'mysql2'
 import { createHmac, timingSafeEqual } from 'crypto'
 import pool from '@/lib/db'
 import { decrementerStockCommande } from '@/lib/commandes'
-import { sendOrderNotificationEmail } from '@/lib/email'
+import { sendOrderNotificationEmail, sendConfirmationPaiementEmail } from '@/lib/email'
 
 function signatureValide(rawBody: string, signatureRecue: string | null): boolean {
   const secret = process.env.KADEVPAY_WEBHOOK_SECRET
@@ -127,6 +127,12 @@ export async function POST(req: NextRequest) {
     montantTotal: commande.montantTotal,
     methodePaiement: commande.methodePaiement,
     adresseLivraison: commande.adresseLivraison,
+  })
+
+  await sendConfirmationPaiementEmail({
+    reference: commande.reference,
+    client: { prenom: utilisateur.prenom, nom: utilisateur.nom, email: utilisateur.email },
+    statut: 'PAYE',
   })
 
   return NextResponse.json({ ok: true })
