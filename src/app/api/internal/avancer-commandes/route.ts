@@ -16,10 +16,17 @@ function secretValide(req: NextRequest): boolean {
 
 /**
  * Appelé toutes les minutes par server.js (cPanel/Passenger) — jamais exposé publiquement.
- * Fait passer automatiquement en EN_PREPARATION toute commande payée depuis 10 minutes,
- * et prévient le client par email. S'appuie sur `updatedAt`, mis à jour par le webhook au
- * passage en PAYE : pas de colonne dédiée, et le mécanisme se rattrape tout seul si le
- * process a été redémarré entre-temps (prochain appel = prochaine vérification).
+ *
+ * 1. Fait passer automatiquement en EN_PREPARATION toute commande payée depuis 10 minutes,
+ *    et prévient le client par email. S'appuie sur `updatedAt`, mis à jour par le webhook au
+ *    passage en PAYE : pas de colonne dédiée, et le mécanisme se rattrape tout seul si le
+ *    process a été redémarré entre-temps (prochain appel = prochaine vérification).
+ *
+ * 2. Annule automatiquement toute commande restée EN_ATTENTE plus de 15 minutes (paiement
+ *    KadevPay échoué ou abandonné) — la commande est créée avant la tentative de paiement
+ *    pour servir de référence au webhook, donc un paiement raté laisse sinon une commande
+ *    fantôme qui pollue le tableau de bord. Pas d'email : le client sait déjà que son
+ *    paiement n'est pas passé, et le stock n'a jamais été réservé pour ces commandes.
  */
 export async function POST(req: NextRequest) {
   if (!secretValide(req)) {
@@ -49,7 +56,16 @@ export async function POST(req: NextRequest) {
       avancees++
     }
 
-    return NextResponse.json({ ok: true, avancees })
+    const [attenteRows] = await pool.execute<RowDataPacket[]>(
+      `SELECT id FROM commandes WHERE statut='EN_ATTENTE' AND createdAt <= (NOW() - INTERVAL 15 MINUTE)`
+    )
+    let annulees = 0
+    for (const commande of attenteRows) {
+      await pool.execute("UPDATE commandes SET statut='ANNULE' WHERE id=?", [commande.id])
+      annulees++
+    }
+
+    return NextResponse.json({ ok: true, avancees, annulees })
   } catch (error) {
     console.error('[POST /api/internal/avancer-commandes]', error)
     return NextResponse.json({ error: 'Erreur serveur.' }, { status: 500 })
